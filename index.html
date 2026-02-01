@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Awtrix Animated Control</title>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <style>
+        :root { --primary: #007AFF; --bg: #000000; --card: #1c1c1e; --text: #ffffff; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); }
+        
+        .tabs { display: flex; background: #111; border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 100; }
+        .tab { flex: 1; padding: 16px; text-align: center; cursor: pointer; color: #888; font-weight: 600; }
+        .tab.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
+
+        .content { padding: 20px; display: none; max-width: 800px; margin: 0 auto; }
+        .content.active { display: block; }
+
+        .card { background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        label { display: block; font-size: 0.75rem; color: #aaa; margin-top: 15px; font-weight: bold; text-transform: uppercase; }
+        input, select, button { width: 100%; padding: 14px; margin-top: 8px; border: 1px solid #333; border-radius: 12px; font-size: 1rem; box-sizing: border-box; background: #2c2c2e; color: white; outline: none; }
+        
+        .grid-params { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .send-btn { background: var(--primary); border: none; font-weight: bold; margin-top: 30px; height: 60px; font-size: 1.2rem; cursor: pointer; transition: 0.2s; }
+        .send-btn:hover { background: #0056b3; }
+
+        /* Biblioteca de Iconos Animados */
+        .search-box { display: flex; gap: 10px; margin-bottom: 25px; position: sticky; top: 60px; background: var(--bg); padding: 15px 0; z-index: 90; }
+        .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
+        .icon-item { background: var(--card); padding: 20px; border-radius: 18px; text-align: center; cursor: pointer; border: 2px solid #333; transition: 0.3s; }
+        .icon-item:hover { border-color: var(--primary); transform: translateY(-5px); }
+        .icon-item img { width: 80px; height: 80px; image-rendering: pixelated; margin-bottom: 12px; background: #000; padding: 5px; border-radius: 10px; }
+        .icon-item b { display: block; font-size: 1.1rem; margin-bottom: 4px; color: #fff; }
+        .icon-item span { font-size: 0.8rem; color: #888; display: block; }
+
+        #status { text-align: center; font-size: 0.75rem; color: #666; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="tabs">
+    <div class="tab active" onclick="showTab('messenger')">Control</div>
+    <div class="tab" onclick="showTab('library')">Iconos Animados</div>
+</div>
+
+<div id="messenger" class="content active">
+    <div class="card">
+        <label>Mensaje para el Ulanzi</label>
+        <input type="text" id="mensaje" placeholder="Escribe tu texto aquí...">
+
+        <div class="grid-params">
+            <div>
+                <label>Color de texto</label>
+                <input type="color" id="color" value="#ffffff" style="height: 50px;">
+            </div>
+            <div>
+                <label>Icono (ID o Nombre)</label>
+                <input type="text" id="iconInput" placeholder="Ej: 123 o ghost">
+            </div>
+        </div>
+
+        <label>Modo de visualización</label>
+        <select id="pushIcon">
+            <option value="0">Icono a la izquierda (Fijo)</option>
+            <option value="1">Icono a la derecha</option>
+            <option value="2">Icono en ambos lados</option>
+        </select>
+
+        <div class="grid-params">
+            <div>
+                <label>Velocidad Scroll</label>
+                <input type="number" id="speed" value="100">
+            </div>
+            <div>
+                <label>Repeticiones</label>
+                <input type="number" id="repeat" value="2">
+            </div>
+        </div>
+
+        <button class="send-btn" onclick="prepararYEnviar()">ENVIAR AHORA</button>
+        <div id="status">Esperando conexión...</div>
+    </div>
+</div>
+
+<div id="library" class="content">
+    <div class="search-box">
+        <input type="text" id="search" placeholder="Busca animaciones: fire, mario, cat...">
+        <button onclick="buscarIconos()" style="width: 100px; background: white; color: black; font-weight: bold;">BUSCAR</button>
+    </div>
+    <div id="iconGrid" class="icon-grid"></div>
+</div>
+
+<script>
+    const BROKER = 'wss://larafuzas:XKEZkZ1GleU7TH66@larafuzas.cloud.shiftr.io';
+    const client = mqtt.connect(BROKER, { clientId: 'web_animated_' + Math.random().toString(16).slice(2) });
+
+    client.on('connect', () => document.getElementById('status').innerText = '🟢 CONECTADO A SHIFTR.IO');
+
+    async function prepararYEnviar() {
+        const val = document.getElementById('iconInput').value.trim();
+        let idFinal = val;
+
+        if (val && isNaN(val)) {
+            document.getElementById('status').innerText = '🔍 Buscando animación...';
+            const res = await fetch(`https://api.awtrixer.com/icons?search=${encodeURIComponent(val)}`);
+            const data = await res.json();
+            if (data.length > 0) {
+                idFinal = data[0].id;
+                document.getElementById('status').innerText = `✅ Usando: ${data[0].name} (#${idFinal})`;
+            }
+        }
+        enviarMQTT(idFinal);
+    }
+
+    function enviarMQTT(iconId) {
+        const hex = document.getElementById('color').value;
+        const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+
+        const payload = {
+            text: document.getElementById('mensaje').value || " ",
+            color: [r, g, b],
+            repeat: parseInt(document.getElementById('repeat').value),
+            scrollSpeed: parseInt(document.getElementById('speed').value),
+            duration: 5
+        };
+
+        if (iconId) {
+            payload.icon = iconId;
+            payload.pushIcon = parseInt(document.getElementById('pushIcon').value);
+        }
+
+        client.publish('awtrix/notify', JSON.stringify(payload));
+        const btn = document.querySelector('.send-btn');
+        btn.innerText = "¡ENVIADO!";
+        setTimeout(() => btn.innerText = "ENVIAR AHORA", 1500);
+    }
+
+    function showTab(t) {
+        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        document.getElementById(t).classList.add('active');
+        event.target.classList.add('active');
+        if(t === 'library' && !document.getElementById('iconGrid').innerHTML) buscarIconos();
+    }
+
+    async function buscarIconos() {
+        const q = document.getElementById('search').value.trim();
+        const grid = document.getElementById('iconGrid');
+        grid.innerHTML = '<p>Cargando iconos animados...</p>';
+        
+        try {
+            // Usando la API de Awtrixer para obtener iconos animados
+            const res = await fetch(`https://api.awtrixer.com/icons?search=${encodeURIComponent(q)}`);
+            const data = await res.json();
+            grid.innerHTML = '';
+            
+            data.forEach(icon => {
+                const div = document.createElement('div');
+                div.className = 'icon-item';
+                // Awtrixer proporciona previsualizaciones en formato GIF o PNG
+                div.innerHTML = `
+                    <img src="https://api.awtrixer.com/icons/${icon.id}/view">
+                    <b>#${icon.id}</b>
+                    <span>${icon.name}</span>
+                `;
+                div.onclick = () => {
+                    document.getElementById('iconInput').value = icon.id;
+                    showTab('messenger');
+                };
+                grid.appendChild(div);
+            });
+        } catch (e) { grid.innerHTML = 'Error al cargar biblioteca.'; }
+    }
+</script>
+</body>
+</html>
