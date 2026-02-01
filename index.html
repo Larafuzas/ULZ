@@ -3,51 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Awtrix Control Center</title>
+    <title>Awtrix LaMetric Search</title>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
         :root { --primary: #007AFF; --bg: #000000; --card: #1c1c1e; --text: #ffffff; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); padding-bottom: 30px; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); padding-bottom: 50px; }
         
-        /* Navegación */
         .tabs { display: flex; background: #111; border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 100; }
-        .tab { flex: 1; padding: 18px; text-align: center; cursor: pointer; color: #888; font-weight: 600; transition: 0.3s; }
-        .tab.active { color: var(--primary); border-bottom: 3px solid var(--primary); background: rgba(0,122,255,0.05); }
+        .tab { flex: 1; padding: 18px; text-align: center; cursor: pointer; color: #888; font-weight: 600; }
+        .tab.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
 
-        .content { padding: 20px; display: none; max-width: 600px; margin: 0 auto; animation: fadeIn 0.3s; }
+        .content { padding: 20px; display: none; max-width: 800px; margin: 0 auto; }
         .content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Tarjeta de Control */
-        .card { background: var(--card); padding: 25px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); border: 1px solid #2c2c2e; }
-        label { display: block; font-size: 0.75rem; color: #8e8e93; margin-top: 18px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
-        input, select, button { width: 100%; padding: 14px; margin-top: 8px; border: 1px solid #333; border-radius: 14px; font-size: 1rem; box-sizing: border-box; background: #2c2c2e; color: white; outline: none; }
-        input:focus { border-color: var(--primary); }
+        .card { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid #2c2c2e; margin-bottom: 20px; }
+        label { display: block; font-size: 0.7rem; color: #aaa; margin-top: 15px; font-weight: bold; text-transform: uppercase; }
+        input, select, button { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #333; border-radius: 12px; font-size: 1rem; box-sizing: border-box; background: #2c2c2e; color: white; outline: none; }
         
-        .grid-params { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .send-btn { background: var(--primary); border: none; font-weight: bold; margin-top: 30px; height: 60px; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 15px rgba(0,122,255,0.3); }
+        .grid-params { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .send-btn { background: var(--primary); border: none; font-weight: bold; margin-top: 25px; height: 60px; font-size: 1.1rem; cursor: pointer; }
 
-        /* Seccion Bibliotecas Externas */
-        .lib-card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #333; display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: white; transition: 0.2s; }
-        .lib-card:hover { background: #2c2c2e; transform: scale(1.02); border-color: var(--primary); }
-        .lib-info b { display: block; font-size: 1.1rem; margin-bottom: 4px; }
-        .lib-info span { font-size: 0.85rem; color: #888; }
-        .lib-icon { font-size: 1.5rem; }
+        /* Buscador y Grid de 4 Columnas */
+        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        .icon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .icon-item { background: var(--card); padding: 10px; border-radius: 12px; text-align: center; cursor: pointer; border: 1px solid #333; transition: 0.2s; }
+        .icon-item:hover { border-color: var(--primary); transform: scale(1.05); }
+        .icon-item img { width: 48px; height: 48px; image-rendering: pixelated; margin-bottom: 5px; }
+        .icon-item b { display: block; font-size: 0.75rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .icon-item span { font-size: 0.65rem; color: #666; }
 
-        #status { text-align: center; font-size: 0.75rem; color: #666; margin-top: 20px; }
+        #status { text-align: center; font-size: 0.7rem; color: #666; margin-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="tabs">
     <div class="tab active" onclick="showTab('messenger')">Control</div>
-    <div class="tab" onclick="showTab('library')">Bibliotecas</div>
+    <div class="tab" onclick="showTab('library')">Buscador LaMetric</div>
 </div>
 
 <div id="messenger" class="content active">
     <div class="card">
-        <label>Texto del Mensaje</label>
-        <input type="text" id="mensaje" placeholder="Ej: ¡Hola desde la Web!">
+        <label>Mensaje</label>
+        <input type="text" id="mensaje" placeholder="¡Hola Ulanzi!">
 
         <div class="grid-params">
             <div>
@@ -58,15 +56,15 @@
                 </select>
             </div>
             <div id="pickerBox">
-                <label>Elegir Color</label>
-                <input type="color" id="color" value="#ffffff" style="height: 50px; padding: 4px;">
+                <label>Color</label>
+                <input type="color" id="color" value="#ffffff" style="height: 48px;">
             </div>
         </div>
 
         <div class="grid-params">
             <div>
-                <label>ID del Icono</label>
-                <input type="number" id="iconID" placeholder="Ej: 1338">
+                <label>Icono (ID o Nombre)</label>
+                <input type="text" id="iconInput" placeholder="Ej: 1338">
             </div>
             <div>
                 <label>Posición</label>
@@ -79,73 +77,97 @@
         </div>
 
         <div class="grid-params">
-            <div><label>Duración (seg)</label><input type="number" id="duration" value="5"></div>
-            <div><label>Repetir</label><input type="number" id="repeat" value="1"></div>
+            <div><label>Duración (s)</label><input type="number" id="duration" value="5"></div>
+            <div><label>Repeticiones</label><input type="number" id="repeat" value="1"></div>
         </div>
 
-        <div class="grid-params">
-            <div><label>Velocidad</label><input type="number" id="speed" value="100"></div>
-            <div><label>Efecto Sonoro</label><select id="sound"><option value="false">Desactivado</option><option value="true">Bip!</option></select></div>
-        </div>
-
-        <button class="send-btn" onclick="enviar()">ENVIAR AHORA</button>
+        <button class="send-btn" onclick="prepararYEnviar()">ENVIAR AHORA</button>
         <div id="status">Conectando...</div>
     </div>
 </div>
 
 <div id="library" class="content">
-    <h2 style="margin-bottom: 5px;">Explorar Iconos</h2>
-    <p style="color: #888; margin-bottom: 25px; font-size: 0.9rem;">Busca el icono en estas webs, anota el ID y pégalo en el panel de control.</p>
-
-    <a href="https://awtrixer.com/" target="_blank" class="lib-card">
-        <div class="lib-info">
-            <b>Awtrixer</b>
-            <span>La mejor para iconos animados y modernos.</span>
-        </div>
-        <div class="lib-icon">✨</div>
-    </a>
-
-    <a href="https://developer.lametric.com/icons" target="_blank" class="lib-card">
-        <div class="lib-info">
-            <b>LaMetric Gallery</b>
-            <span>La base de datos original (miles de iconos).</span>
-        </div>
-        <div class="lib-icon">🖼️</div>
-    </a>
-
-    <a href="https://blueforcer.github.io/awtrix-light/" target="_blank" class="lib-card">
-        <div class="lib-info">
-            <b>Awtrix Community</b>
-            <span>Repositorio oficial y documentación.</span>
-        </div>
-        <div class="lib-icon">🚀</div>
-    </a>
+    <div class="search-box">
+        <input type="text" id="search" placeholder="Buscar en LaMetric (ej: mario, fire)...">
+        <button onclick="buscarLaMetric()" style="width: 80px; background: #fff; color: #000;">BUSCAR</button>
+    </div>
+    <div id="iconGrid" class="icon-grid"></div>
 </div>
 
 <script>
-    // Configuración desde tu foto
     const BROKER = 'wss://larafuzas:XKEZkZ1GleU7TH66@larafuzas.cloud.shiftr.io';
+    const PROXY = 'https://api.allorigins.win/raw?url=';
     const client = mqtt.connect(BROKER, { clientId: 'web_ulanzi_' + Math.random().toString(16).slice(2) });
 
-    client.on('connect', () => document.getElementById('status').innerText = '🟢 RELOJ CONECTADO');
+    client.on('connect', () => document.getElementById('status').innerText = '🟢 CONECTADO');
 
     function toggleColor() {
         const isRainbow = document.getElementById('colorMode').value === 'rainbow';
         document.getElementById('pickerBox').style.opacity = isRainbow ? '0.3' : '1';
     }
 
-    function enviar() {
+    async function buscarLaMetric() {
+        const query = document.getElementById('search').value.trim();
+        const grid = document.getElementById('iconGrid');
+        grid.innerHTML = '<p style="grid-column: 1/5; text-align: center;">Cargando iconos...</p>';
+
+        try {
+            const url = `${PROXY}${encodeURIComponent('https://developer.lametric.com/api/v2/icons/search?q=' + query + '&limit=60')}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            
+            if (data.data && data.data.length > 0) {
+                // ORDENAR ALFABÉTICAMENTE POR NOMBRE
+                const sortedIcons = data.data.sort((a, b) => a.title.localeCompare(b.title));
+                
+                grid.innerHTML = '';
+                sortedIcons.forEach(icon => {
+                    const div = document.createElement('div');
+                    div.className = 'icon-item';
+                    div.innerHTML = `
+                        <img src="https://developer.lametric.com/content/apps/icon_thumbs/${icon.id}.png">
+                        <b>${icon.title}</b>
+                        <span>#${icon.id}</span>
+                    `;
+                    div.onclick = () => {
+                        document.getElementById('iconInput').value = icon.id;
+                        showTab('messenger');
+                    };
+                    grid.appendChild(div);
+                });
+            } else {
+                grid.innerHTML = '<p style="grid-column: 1/5; text-align: center;">No hay resultados.</p>';
+            }
+        } catch (e) {
+            grid.innerHTML = '<p style="grid-column: 1/5; text-align: center;">Error de conexión. Reintenta.</p>';
+        }
+    }
+
+    async function prepararYEnviar() {
+        const val = document.getElementById('iconInput').value.trim();
+        let idFinal = val;
+        // Si es texto, buscamos el primero que coincida
+        if (val && isNaN(val)) {
+            try {
+                const res = await fetch(`${PROXY}${encodeURIComponent('https://developer.lametric.com/api/v2/icons/search?q=' + val + '&limit=1')}`);
+                const data = await res.json();
+                if (data.data.length > 0) idFinal = data.data[0].id;
+            } catch(e) {}
+        }
+        enviarMQTT(idFinal);
+    }
+
+    function enviarMQTT(iconId) {
         const hex = document.getElementById('color').value;
         const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
         const isRainbow = document.getElementById('colorMode').value === 'rainbow';
-        const iconId = document.getElementById('iconID').value;
 
         const payload = {
             text: document.getElementById('mensaje').value || " ",
             rainbow: isRainbow,
-            duration: parseInt(document.getElementById('duration').value) || 5,
-            repeat: parseInt(document.getElementById('repeat').value) || 1,
-            scrollSpeed: parseInt(document.getElementById('speed').value) || 100,
+            duration: parseInt(document.getElementById('duration').value),
+            repeat: parseInt(document.getElementById('repeat').value),
+            scrollSpeed: 100,
             wakeup: true
         };
 
@@ -154,17 +176,11 @@
             payload.icon = iconId;
             payload.pushIcon = parseInt(document.getElementById('pushIcon').value);
         }
-        if (document.getElementById('sound').value === 'true') payload.beep = true;
 
         client.publish('awtrix/notify', JSON.stringify(payload));
-        
         const btn = document.querySelector('.send-btn');
-        btn.innerText = "¡MENSAJE ENVIADO!";
-        btn.style.background = "#34C759";
-        setTimeout(() => { 
-            btn.innerText = "ENVIAR AHORA"; 
-            btn.style.background = "#007AFF";
-        }, 1500);
+        btn.innerText = "¡ENVIADO!";
+        setTimeout(() => btn.innerText = "ENVIAR AHORA", 1500);
     }
 
     function showTab(t) {
