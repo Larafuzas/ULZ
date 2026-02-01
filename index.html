@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Awtrix Master Control</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23ADE1F5'/><path d='M50 5 L55 20 L45 20 Z M95 50 L80 45 L80 55 Z M50 95 L45 80 L55 80 Z M5 50 L20 55 L20 45 Z' fill='%2388c9e2'/><text x='50' y='65' font-family='monospace' font-size='40' font-weight='bold' fill='black' text-anchor='middle'>Aw</text></svg>">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
-        :root { --primary: #007AFF; --bg: #000000; --card: #1c1c1e; --text: #ffffff; --pastel: #ADE1F5; }
+        :root { --primary: #007AFF; --bg: #000000; --card: #1c1c1e; --text: #ffffff; --pastel: #ADE1F5; --danger: #FF3B30; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); padding-bottom: 50px; }
-        .tabs { display: flex; background: #111; border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 100; }
-        .tab { flex: 1; padding: 18px; text-align: center; cursor: pointer; color: #888; font-weight: 600; }
+        .tabs { display: flex; background: #111; border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 100; overflow-x: auto; }
+        .tab { flex: 1; padding: 18px; text-align: center; cursor: pointer; color: #888; font-weight: 600; white-space: nowrap; }
         .tab.active { color: var(--pastel); border-bottom: 3px solid var(--pastel); background: rgba(173, 225, 245, 0.05); }
         .content { padding: 20px; display: none; max-width: 800px; margin: 0 auto; }
         .content.active { display: block; }
@@ -19,10 +21,15 @@
         input, select, button { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #333; border-radius: 12px; font-size: 1rem; box-sizing: border-box; background: #2c2c2e; color: white; outline: none; }
         .grid-params { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .send-btn { background: var(--primary); border: none; font-weight: bold; margin-top: 25px; height: 60px; font-size: 1.1rem; cursor: pointer; }
+        
+        /* Estilos de Lista de Mensajes */
+        .msg-item { display: flex; justify-content: space-between; align-items: center; background: #2c2c2e; padding: 12px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #444; }
+        .msg-name { font-weight: bold; flex-grow: 1; cursor: pointer; }
+        .delete-btn { background: var(--danger); color: white; border: none; padding: 6px 10px; border-radius: 8px; width: auto; font-size: 0.8rem; margin-left: 10px; cursor: pointer; }
+        
         .icon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .icon-item { background: var(--card); padding: 8px; border-radius: 10px; text-align: center; cursor: pointer; border: 1px solid #333; overflow: hidden; }
-        .icon-item img { width: 40px; height: 40px; image-rendering: pixelated; margin-bottom: 5px; background: #000; border-radius: 4px; }
-        .icon-item b { display: block; font-size: 0.65rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .icon-item { background: var(--card); padding: 8px; border-radius: 10px; text-align: center; cursor: pointer; border: 1px solid #333; }
+        .icon-item img { width: 40px; height: 40px; image-rendering: pixelated; }
         #status { text-align: center; font-size: 0.7rem; color: #666; margin-top: 15px; }
     </style>
 </head>
@@ -30,158 +37,224 @@
 
 <div class="tabs">
     <div class="tab active" onclick="showTab('messenger')">Control</div>
-    <div class="tab" id="tab-icons" onclick="showTab('library')">Iconos</div>
+    <div class="tab" onclick="showTab('saved-msgs')">Mis Mensajes</div>
+    <div class="tab" onclick="showTab('library')">Iconos</div>
+    <div class="tab" onclick="showTab('settings')">Ajustes</div>
 </div>
 
 <div id="messenger" class="content active">
     <div class="card">
         <label>Mensaje</label>
-        <input type="text" id="mensaje" placeholder="¡Hola Larafuzas!">
-
+        <input type="text" id="mensaje" placeholder="Escribe algo...">
         <div class="grid-params">
             <div>
-                <label>Modo Color</label>
+                <label>Color</label>
                 <select id="colorMode" onchange="toggleColor()">
                     <option value="solid">Sólido</option>
                     <option value="rainbow">Arcoíris</option>
                 </select>
             </div>
-            <div id="pickerBox">
-                <label>Color</label>
-                <input type="color" id="color" value="#ffffff" style="height: 48px; padding: 2px;">
-            </div>
+            <div id="pickerBox"><label>&nbsp;</label><input type="color" id="color" value="#ffffff" style="height: 48px;"></div>
         </div>
-
         <div class="grid-params">
-            <div>
-                <label>Icono (ID o Local)</label>
-                <input type="text" id="iconInput" placeholder="Ej: 1338">
-            </div>
-            <div>
-                <label>Posición</label>
-                <select id="pushIcon">
-                    <option value="0">Izquierda</option>
-                    <option value="1">Derecha</option>
-                    <option value="2">Ambos</option>
-                </select>
-            </div>
+            <div><label>Icono</label><input type="text" id="iconInput" placeholder="ID o Local"></div>
+            <div><label>Posición</label><select id="pushIcon"><option value="0">Izq</option><option value="1">Der</option></select></div>
         </div>
-
         <div class="grid-params">
             <div><label>Duración (s)</label><input type="number" id="duration" value="5"></div>
-            <div><label>Repeticiones</label><input type="number" id="repeat" value="1"></div>
+            <div><label>Repetir</label><input type="number" id="repeat" value="1"></div>
         </div>
-
         <button class="send-btn" onclick="enviarMQTT()">ENVIAR AHORA</button>
-        <div id="status">Conectando...</div>
+        <button onclick="guardarNuevoRapido()" style="background: #34C759; margin-top: 10px;">💾 GUARDAR CONFIGURACIÓN</button>
+        <div id="status">Desconectado</div>
+    </div>
+</div>
+
+<div id="saved-msgs" class="content">
+    <div class="card">
+        <h3>Mensajes Guardados</h3>
+        <div id="listadoMensajes">
+            </div>
+    </div>
+    <div class="card">
+        <h3>Copia de Respaldo</h3>
+        <button onclick="exportarMensajes()" style="background: #5856D6; margin-bottom: 10px;">📤 EXPORTAR ARCHIVO</button>
+        <label>Importar Archivo</label>
+        <input type="file" id="importFile" onchange="importarMensajes(this)" style="font-size: 0.8rem;">
     </div>
 </div>
 
 <div id="library" class="content">
     <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-        <input type="text" id="search" placeholder="Buscar en LaMetric..." onkeypress="if(event.key==='Enter') buscarLaMetric(this.value)">
-        <button onclick="buscarLaMetric(document.getElementById('search').value)" style="width: 85px; background: #fff; color: #000; font-weight: bold; margin:0;">BUSCAR</button>
+        <input type="text" id="search" placeholder="Buscar iconos..." onkeypress="if(event.key==='Enter') buscarLaMetric(this.value)">
+        <button onclick="buscarLaMetric(document.getElementById('search').value)" style="width: 70px; background: #fff; color: #000; margin:0;">IR</button>
     </div>
     <div id="iconGrid" class="icon-grid"></div>
 </div>
 
+<div id="settings" class="content">
+    <div class="card">
+        <h3>Adafruit IO</h3>
+        <label>Usuario</label>
+        <input type="text" id="ad_user">
+        <label>AIO Key</label>
+        <input type="password" id="ad_key">
+        <label>Feed</label>
+        <input type="text" id="ad_feed" value="notify">
+        <button class="send-btn" style="background: #34C759;" onclick="guardarAjustes()">GUARDAR AJUSTES</button>
+    </div>
+</div>
+
 <script>
-    // --- CREDENCIALES ---
-    const AD_USER = 'Larafuzas'; 
-    const AD_KEY  = 'aio_Iioi89pIlpMGcYCx7xaDJT6qVSWZ'; 
-    const TOPIC = `${AD_USER}/feeds/notify`; 
+    let client = null;
     const PROXY = 'https://corsproxy.io/?'; 
 
-    // Configuración de conexión optimizada para Adafruit
-    const client = mqtt.connect(`wss://io.adafruit.com:443`, {
-        username: AD_USER,
-        password: AD_KEY,
-        clientId: 'web_' + Math.random().toString(16).substr(2, 8)
-    });
+    window.onload = () => {
+        document.getElementById('ad_user').value = localStorage.getItem('ad_user') || '';
+        document.getElementById('ad_key').value = localStorage.getItem('ad_key') || '';
+        document.getElementById('ad_feed').value = localStorage.getItem('ad_feed') || 'notify';
+        actualizarListado();
+        if(localStorage.getItem('ad_key')) conectarMQTT();
+    };
 
-    client.on('connect', () => {
-        document.getElementById('status').innerText = '🟢 CONECTADO A ADAFRUIT';
-        console.log('Conectado con éxito');
-    });
-
-    client.on('error', (err) => {
-        document.getElementById('status').innerText = '🔴 ERROR: REVISA TU KEY';
-        console.error('Error de conexión:', err);
-    });
-
-    client.on('offline', () => {
-        document.getElementById('status').innerText = '🟡 DESCONECTADO (Offline)';
-    });
-
-    function toggleColor() {
-        const isRainbow = document.getElementById('colorMode').value === 'rainbow';
-        document.getElementById('pickerBox').style.opacity = isRainbow ? '0.3' : '1';
+    // --- GESTIÓN DE MENSAJES ---
+    function guardarNuevoRapido() {
+        const nombre = prompt("Nombre del mensaje:");
+        if (!nombre) return;
+        let rapidos = JSON.parse(localStorage.getItem('rapidos') || '{}');
+        rapidos[nombre] = {
+            text: document.getElementById('mensaje').value,
+            colorMode: document.getElementById('colorMode').value,
+            color: document.getElementById('color').value,
+            icon: document.getElementById('iconInput').value,
+            pushIcon: document.getElementById('pushIcon').value,
+            duration: document.getElementById('duration').value,
+            repeat: document.getElementById('repeat').value
+        };
+        localStorage.setItem('rapidos', JSON.stringify(rapidos));
+        actualizarListado();
     }
 
-    async function buscarLaMetric(query = '') {
-        const grid = document.getElementById('iconGrid');
-        grid.innerHTML = '<p style="grid-column: 1/5; text-align: center;">Cargando...</p>';
-        const endpoint = query 
-            ? `https://developer.lametric.com/api/v2/icons/search?q=${encodeURIComponent(query)}&limit=60`
-            : `https://developer.lametric.com/api/v2/icons/gallery?limit=60`;
-        
-        try {
-            const res = await fetch(PROXY + encodeURIComponent(endpoint));
-            const data = await res.json();
-            if (data && data.data) {
-                const sorted = data.data.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
-                grid.innerHTML = '';
-                sorted.forEach(icon => {
-                    const div = document.createElement('div');
-                    div.className = 'icon-item';
-                    div.innerHTML = `<img src="https://developer.lametric.com/content/apps/icon_thumbs/${icon.id}.png"><b>${icon.title || 'Icon'}</b><span>#${icon.id}</span>`;
-                    div.onclick = () => { document.getElementById('iconInput').value = icon.id; showTab('messenger'); };
-                    grid.appendChild(div);
-                });
-            }
-        } catch (e) { grid.innerHTML = '<p style="grid-column: 1/5; text-align: center;">Error API.</p>'; }
+    function actualizarListado() {
+        const container = document.getElementById('listadoMensajes');
+        const rapidos = JSON.parse(localStorage.getItem('rapidos') || '{}');
+        container.innerHTML = '';
+        for (let nombre in rapidos) {
+            const div = document.createElement('div');
+            div.className = 'msg-item';
+            div.innerHTML = `
+                <span class="msg-name" onclick="cargarYEnviar('${nombre}')">${nombre}</span>
+                <button class="delete-btn" onclick="borrarMensaje('${nombre}')">Eliminar</button>
+            `;
+            container.appendChild(div);
+        }
+    }
+
+    function cargarYEnviar(nombre) {
+        const c = JSON.parse(localStorage.getItem('rapidos'))[nombre];
+        document.getElementById('mensaje').value = c.text;
+        document.getElementById('colorMode').value = c.colorMode;
+        document.getElementById('color').value = c.color;
+        document.getElementById('iconInput').value = c.icon;
+        document.getElementById('pushIcon').value = c.pushIcon;
+        document.getElementById('duration').value = c.duration;
+        document.getElementById('repeat').value = c.repeat;
+        toggleColor();
+        showTab('messenger');
+    }
+
+    function borrarMensaje(nombre) {
+        if(confirm(`¿Borrar "${nombre}"?`)) {
+            let rapidos = JSON.parse(localStorage.getItem('rapidos'));
+            delete rapidos[nombre];
+            localStorage.setItem('rapidos', JSON.stringify(rapidos));
+            actualizarListado();
+        }
+    }
+
+    // --- RESPALDO ---
+    function exportarMensajes() {
+        const data = localStorage.getItem('rapidos') || '{}';
+        const blob = new Blob([data], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'awtrix_backup.json';
+        a.click();
+    }
+
+    function importarMensajes(input) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                localStorage.setItem('rapidos', JSON.stringify(data));
+                actualizarListado();
+                alert("Importación exitosa.");
+            } catch(e) { alert("Archivo inválido."); }
+        };
+        reader.readAsText(input.files[0]);
+    }
+
+    // --- NÚCLEO (MQTT & UI) ---
+    function conectarMQTT() {
+        client = mqtt.connect(`wss://io.adafruit.com:443`, {
+            username: localStorage.getItem('ad_user'),
+            password: localStorage.getItem('ad_key'),
+            clientId: 'web_' + Math.random().toString(16).substr(2, 6)
+        });
+        client.on('connect', () => document.getElementById('status').innerText = '🟢 CONECTADO');
     }
 
     function enviarMQTT() {
-        if (!client.connected) {
-            alert("No hay conexión con Adafruit. Reintenta.");
-            return;
-        }
-
-        const iconInput = document.getElementById('iconInput').value.trim();
-        const hex = document.getElementById('color').value;
-        const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+        if(!client?.connected) return alert("Sin conexión.");
         const isRainbow = document.getElementById('colorMode').value === 'rainbow';
-
+        const hex = document.getElementById('color').value;
         const payload = {
             text: document.getElementById('mensaje').value || " ",
             rainbow: isRainbow,
-            duration: parseInt(document.getElementById('duration').value) || 5,
-            repeat: parseInt(document.getElementById('repeat').value) || 1,
+            duration: parseInt(document.getElementById('duration').value),
+            repeat: parseInt(document.getElementById('repeat').value),
             wakeup: true
         };
-
-        if (!isRainbow) payload.color = [r, g, b];
-        if (iconInput) {
-            payload.icon = iconInput; 
-            payload.pushIcon = parseInt(document.getElementById('pushIcon').value);
-        }
-
-        client.publish(TOPIC, JSON.stringify(payload));
-        const btn = document.querySelector('.send-btn');
-        btn.innerText = "¡ENVIADO!";
-        setTimeout(() => btn.innerText = "ENVIAR AHORA", 1500);
+        if(!isRainbow) payload.color = [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+        const icon = document.getElementById('iconInput').value;
+        if(icon) { payload.icon = icon; payload.pushIcon = parseInt(document.getElementById('pushIcon').value); }
+        client.publish(`${localStorage.getItem('ad_user')}/feeds/${localStorage.getItem('ad_feed')}`, JSON.stringify(payload));
     }
 
     function showTab(t) {
         document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
         document.getElementById(t).classList.add('active');
-        if(t === 'messenger') document.querySelector('.tab:nth-child(1)').classList.add('active');
-        else {
-            document.getElementById('tab-icons').classList.add('active');
-            if(document.getElementById('iconGrid').innerHTML === "") buscarLaMetric();
-        }
+        event.currentTarget.classList.add('active');
+        if(t === 'library' && document.getElementById('iconGrid').innerHTML === "") buscarLaMetric();
+    }
+
+    async function buscarLaMetric(query = '') {
+        const grid = document.getElementById('iconGrid');
+        grid.innerHTML = '...';
+        const url = query ? `https://developer.lametric.com/api/v2/icons/search?q=${encodeURIComponent(query)}&limit=60` : `https://developer.lametric.com/api/v2/icons/gallery?limit=60`;
+        try {
+            const res = await fetch(PROXY + encodeURIComponent(url));
+            const data = await res.json();
+            grid.innerHTML = '';
+            data.data.forEach(icon => {
+                const div = document.createElement('div');
+                div.className = 'icon-item';
+                div.innerHTML = `<img src="https://developer.lametric.com/content/apps/icon_thumbs/${icon.id}.png"><br><small>#${icon.id}</small>`;
+                div.onclick = () => { document.getElementById('iconInput').value = icon.id; showTab('messenger'); };
+                grid.appendChild(div);
+            });
+        } catch (e) { grid.innerHTML = 'Error'; }
+    }
+
+    function toggleColor() { document.getElementById('pickerBox').style.opacity = document.getElementById('colorMode').value === 'rainbow' ? '0.3' : '1'; }
+    function guardarAjustes() {
+        localStorage.setItem('ad_user', document.getElementById('ad_user').value.trim());
+        localStorage.setItem('ad_key', document.getElementById('ad_key').value.trim());
+        localStorage.setItem('ad_feed', document.getElementById('ad_feed').value.trim());
+        location.reload();
     }
 </script>
 </body>
