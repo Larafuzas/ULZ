@@ -21,11 +21,12 @@
         input, select, button { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #333; border-radius: 12px; font-size: 1rem; box-sizing: border-box; background: #2c2c2e; color: white; outline: none; }
         
         .grid-params { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .send-btn { background: var(--primary); border: none; font-weight: bold; margin-top: 25px; height: 60px; font-size: 1.1rem; cursor: pointer; }
+        .send-btn { background: var(--primary); border: none; font-weight: bold; margin-top: 25px; height: 60px; font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
 
         .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
         .icon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .icon-item { background: var(--card); padding: 8px; border-radius: 10px; text-align: center; cursor: pointer; border: 1px solid #333; overflow: hidden; }
+        .icon-item { background: var(--card); padding: 8px; border-radius: 10px; text-align: center; cursor: pointer; border: 1px solid #333; overflow: hidden; transition: 0.2s; }
+        .icon-item:hover { border-color: var(--primary); transform: scale(1.03); }
         .icon-item img { width: 40px; height: 40px; image-rendering: pixelated; margin-bottom: 5px; background: #000; border-radius: 4px; }
         .icon-item b { display: block; font-size: 0.65rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -42,13 +43,13 @@
 <div id="messenger" class="content active">
     <div class="card">
         <label>Mensaje</label>
-        <input type="text" id="mensaje" placeholder="¡Hola!">
+        <input type="text" id="mensaje" placeholder="¡Escribe algo!">
 
         <div class="grid-params">
             <div>
-                <label>Modo Color</label>
+                <label>Color Texto</label>
                 <select id="colorMode" onchange="toggleColor()">
-                    <option value="solid">Color Sólido</option>
+                    <option value="solid">Sólido</option>
                     <option value="rainbow">Arcoíris</option>
                 </select>
             </div>
@@ -60,11 +61,11 @@
 
         <div class="grid-params">
             <div>
-                <label>Icono (ID o Nombre Local)</label>
+                <label>Icono (ID o Local)</label>
                 <input type="text" id="iconInput" placeholder="Ej: 1338 o mi_logo">
             </div>
             <div>
-                <label>Posición Icono</label>
+                <label>Posición</label>
                 <select id="pushIcon">
                     <option value="0">Izquierda</option>
                     <option value="1">Derecha</option>
@@ -79,21 +80,21 @@
         </div>
 
         <button class="send-btn" onclick="enviarMQTT()">ENVIAR AHORA</button>
-        <div id="status">Conectado a Shiftr</div>
+        <div id="status">Iniciando...</div>
     </div>
 </div>
 
 <div id="library" class="content">
     <div class="search-box">
-        <input type="text" id="search" placeholder="Buscar en LaMetric..." onkeypress="if(event.key==='Enter') buscarLaMetric()">
-        <button onclick="buscarLaMetric()" style="width: 85px; background: #fff; color: #000; font-weight: bold;">BUSCAR</button>
+        <input type="text" id="search" placeholder="Busca en LaMetric..." onkeypress="if(event.key==='Enter') buscarLaMetric(this.value)">
+        <button onclick="buscarLaMetric(document.getElementById('search').value)" style="width: 85px; background: #fff; color: #000; font-weight: bold;">BUSCAR</button>
     </div>
     <div id="iconGrid" class="icon-grid"></div>
 </div>
 
 <script>
     const BROKER = 'wss://larafuzas:XKEZkZ1GleU7TH66@larafuzas.cloud.shiftr.io';
-    const PROXY = 'https://api.allorigins.win/get?url=';
+    const PROXY = 'https://corsproxy.io/?'; 
     const client = mqtt.connect(BROKER, { clientId: 'web_ulanzi_' + Math.random().toString(16).slice(2) });
 
     client.on('connect', () => document.getElementById('status').innerText = '🟢 CONECTADO');
@@ -103,29 +104,44 @@
         document.getElementById('pickerBox').style.opacity = isRainbow ? '0.3' : '1';
     }
 
-    // El buscador ahora solo sirve para iconos externos (LaMetric)
-    async function buscarLaMetric() {
-        const query = document.getElementById('search').value.trim();
-        if(!query) return;
+    async function buscarLaMetric(query = '') {
         const grid = document.getElementById('iconGrid');
-        grid.innerHTML = 'Buscando...';
-        const targetUrl = `https://developer.lametric.com/api/v2/icons/search?q=${encodeURIComponent(query)}&limit=60`;
+        grid.innerHTML = '<p style="grid-column: 1/5; text-align: center;">Cargando iconos...</p>';
+
+        // Si no hay query, usamos la galería principal (populares)
+        const endpoint = query 
+            ? `https://developer.lametric.com/api/v2/icons/search?q=${encodeURIComponent(query)}&limit=60`
+            : `https://developer.lametric.com/api/v2/icons/gallery?limit=60`;
+        
         try {
-            const res = await fetch(`${PROXY}${encodeURIComponent(targetUrl)}`);
-            const json = await res.json();
-            const data = JSON.parse(json.contents);
-            if (data.data) {
-                const sorted = data.data.sort((a, b) => a.title.localeCompare(b.title));
+            const res = await fetch(PROXY + encodeURIComponent(endpoint));
+            const data = await res.json();
+            
+            if (data && data.data && data.data.length > 0) {
+                // Ordenar alfabéticamente por título
+                const sortedIcons = data.data.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+                
                 grid.innerHTML = '';
-                sorted.forEach(icon => {
+                sortedIcons.forEach(icon => {
                     const div = document.createElement('div');
                     div.className = 'icon-item';
-                    div.innerHTML = `<img src="https://developer.lametric.com/content/apps/icon_thumbs/${icon.id}.png"><b>${icon.title}</b><span>#${icon.id}</span>`;
-                    div.onclick = () => { document.getElementById('iconInput').value = icon.id; showTab('messenger'); };
+                    div.innerHTML = `
+                        <img src="https://developer.lametric.com/content/apps/icon_thumbs/${icon.id}.png" loading="lazy">
+                        <b>${icon.title || 'Icon'}</b>
+                        <span>#${icon.id}</span>
+                    `;
+                    div.onclick = () => {
+                        document.getElementById('iconInput').value = icon.id;
+                        showTab('messenger');
+                    };
                     grid.appendChild(div);
                 });
+            } else {
+                grid.innerHTML = '<p style="grid-column: 1/5; text-align: center;">Sin resultados.</p>';
             }
-        } catch (e) { grid.innerHTML = 'Error API'; }
+        } catch (e) {
+            grid.innerHTML = '<p style="grid-column: 1/5; text-align: center;">Error al cargar la galería.</p>';
+        }
     }
 
     function enviarMQTT() {
@@ -139,17 +155,13 @@
             rainbow: isRainbow,
             duration: parseInt(document.getElementById('duration').value) || 5,
             repeat: parseInt(document.getElementById('repeat').value) || 1,
+            scrollSpeed: 100,
             wakeup: true
         };
 
         if (!isRainbow) payload.color = [r, g, b];
-        
-        // LÓGICA DE ICONO:
-        // Si hay algo escrito, lo enviamos tal cual. 
-        // Awtrix 3 buscará primero en su memoria interna (archivo .bin) 
-        // y si no existe, intentará descargarlo por ID desde la nube.
         if (iconInput) {
-            payload.icon = iconInput;
+            payload.icon = iconInput; // Admite IDs numéricos o nombres locales
             payload.pushIcon = parseInt(document.getElementById('pushIcon').value);
         }
 
@@ -168,8 +180,16 @@
         document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
         document.getElementById(t).classList.add('active');
-        if(t === 'messenger') document.querySelector('.tab:nth-child(1)').classList.add('active');
-        else document.getElementById('tab-icons').classList.add('active');
+        
+        if(t === 'messenger') {
+            document.querySelector('.tab:nth-child(1)').classList.add('active');
+        } else {
+            document.getElementById('tab-icons').classList.add('active');
+            // Carga automática al entrar por primera vez
+            if(document.getElementById('iconGrid').innerHTML === "") {
+                buscarLaMetric();
+            }
+        }
     }
 </script>
 </body>
