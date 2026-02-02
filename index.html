@@ -40,7 +40,7 @@
 
 <div id="messenger" class="content active">
     <div class="card">
-        <h3>Awtrix Push</h3>
+        <h3>Enviar Notificación</h3>
         <label>Mensaje</label>
         <input type="text" id="mensaje" placeholder="Escribe un mensaje...">
         <div class="grid-params">
@@ -51,7 +51,7 @@
             <div><label>Icono</label><input type="text" id="iconInput" placeholder="ID (ej: 1338)"></div>
             <div><label>Posición</label><select id="pushIcon"><option value="0">Izq</option><option value="1">Der</option></select></div>
         </div>
-        <button class="send-btn" onclick="enviarMQTT()">ENVIAR A AWTRIX</button>
+        <button class="send-btn" onclick="enviarMQTT()">ENVIAR AL RELOJ</button>
         <button onclick="guardarFav()" style="background: #34C759; margin-top: 10px; border:none; cursor:pointer; font-weight:bold;">💾 GUARDAR FAVORITO</button>
         <div id="status">Desconectado</div>
     </div>
@@ -64,7 +64,7 @@
 <div id="library" class="content">
     <div class="card" style="background: rgba(0,122,255,0.1); border-color: var(--primary);">
         <h3>Galería LaMetric</h3>
-        <a href="https://developer.lametric.com/icons" target="_blank"><button style="background:var(--primary); border:none;">BUSCAR ICONOS ↗</button></a>
+        <a href="https://developer.lametric.com/icons" target="_blank"><button style="background:var(--primary); border:none; cursor:pointer;">BUSCAR ICONOS ↗</button></a>
     </div>
     <div class="card"><div id="iconGrid" class="icon-grid"></div></div>
 </div>
@@ -74,7 +74,7 @@
         <h3>Adafruit Config</h3>
         <label>Usuario</label><input type="text" id="ad_user" placeholder="Larafuzas">
         <label>AIO Key</label><input type="password" id="ad_key" placeholder="aio_...">
-        <label>Feed</label><input type="text" id="ad_feed" value="awtrix">
+        <label>Feed</label><input type="text" id="ad_feed" value="notify">
         <button class="send-btn" style="background:#34C759;" onclick="guardarSet()">GUARDAR Y RECONECTAR</button>
     </div>
 </div>
@@ -86,7 +86,7 @@
     window.onload = () => {
         document.getElementById('ad_user').value = localStorage.getItem('ad_user') || '';
         document.getElementById('ad_key').value = localStorage.getItem('ad_key') || '';
-        document.getElementById('ad_feed').value = localStorage.getItem('ad_feed') || 'awtrix';
+        document.getElementById('ad_feed').value = localStorage.getItem('ad_feed') || 'notify';
         renderIconos();
         renderFavs();
         if(localStorage.getItem('ad_key')) conectar();
@@ -95,42 +95,74 @@
     function conectar() {
         const u = localStorage.getItem('ad_user');
         const k = localStorage.getItem('ad_key');
-        client = mqtt.connect(`wss://io.adafruit.com:443`, { username: u, password: k, clientId: 'web_' + Math.random().toString(16).substr(2,6) });
-        client.on('connect', () => document.getElementById('status').innerText = '🟢 CONECTADO A ADAFRUIT');
-        client.on('error', () => document.getElementById('status').innerText = '🔴 ERROR DE CONEXIÓN');
+        if(!u || !k) return;
+
+        client = mqtt.connect(`wss://io.adafruit.com:443`, { 
+            username: u, 
+            password: k, 
+            clientId: 'web_' + Math.random().toString(16).substr(2,6) 
+        });
+
+        client.on('connect', () => {
+            document.getElementById('status').innerText = '🟢 CONECTADO A ADAFRUIT';
+            document.getElementById('status').style.color = '#34C759';
+        });
+
+        client.on('error', () => {
+            document.getElementById('status').innerText = '🔴 ERROR DE CONEXIÓN';
+            document.getElementById('status').style.color = '#FF3B30';
+        });
     }
 
     function enviarMQTT() {
-        if(!client?.connected) return alert("Revisa la conexión en Ajustes.");
+        if(!client?.connected) return alert("Revisa la conexión en la pestaña Ajustes.");
+        
         const isR = document.getElementById('colorMode').value === 'rainbow';
         const hex = document.getElementById('color').value;
+        
         const payload = {
             text: document.getElementById('mensaje').value || " ",
             rainbow: isR,
             wakeup: true,
             duration: 5
         };
-        if(!isR) payload.color = [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
-        const ic = document.getElementById('iconInput').value.trim();
-        if(ic) { payload.icon = ic; payload.pushIcon = parseInt(document.getElementById('pushIcon').value); }
 
-        const topic = `${localStorage.getItem('ad_user')}/feeds/${localStorage.getItem('ad_feed')}`;
+        if(!isR) {
+            payload.color = [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+        }
+
+        const ic = document.getElementById('iconInput').value.trim();
+        if(ic) { 
+            payload.icon = ic; 
+            payload.pushIcon = parseInt(document.getElementById('pushIcon').value); 
+        }
+
+        const u = localStorage.getItem('ad_user');
+        const f = localStorage.getItem('ad_feed') || 'notify';
+        const topic = `${u}/feeds/${f.toLowerCase()}`;
+
         client.publish(topic, JSON.stringify(payload));
         
         const b = document.querySelector('.send-btn');
         b.innerText = "¡ENVIADO!";
-        setTimeout(() => b.innerText = "ENVIAR A AWTRIX", 1500);
+        setTimeout(() => b.innerText = "ENVIAR AL RELOJ", 1500);
     }
 
     // --- FAVORITOS ---
     function guardarFav() {
-        const n = prompt("Nombre:");
+        const n = prompt("Nombre para este favorito:");
         if(!n) return;
         let r = JSON.parse(localStorage.getItem('rapidos') || '{}');
-        r[n] = { text: document.getElementById('mensaje').value, icon: document.getElementById('iconInput').value };
+        r[n] = { 
+            text: document.getElementById('mensaje').value, 
+            icon: document.getElementById('iconInput').value,
+            color: document.getElementById('color').value,
+            colorMode: document.getElementById('colorMode').value
+        };
         localStorage.setItem('rapidos', JSON.stringify(r));
         renderFavs();
     }
+
     function renderFavs() {
         const c = document.getElementById('listado');
         const r = JSON.parse(localStorage.getItem('rapidos') || '{}');
@@ -138,17 +170,24 @@
         for(let n in r) {
             const d = document.createElement('div');
             d.className = 'msg-item';
-            d.innerHTML = `<span style="cursor:pointer" onclick="cargar('${n}')">${n}</span><button class="delete-btn" onclick="borrar('${n}')">X</button>`;
+            d.innerHTML = `<span style="cursor:pointer; font-weight:bold; color:var(--pastel);" onclick="cargar('${n}')">${n}</span>
+                           <button class="delete-btn" onclick="borrar('${n}')">Borrar</button>`;
             c.appendChild(d);
         }
     }
+
     function cargar(n) {
         const d = JSON.parse(localStorage.getItem('rapidos'))[n];
         document.getElementById('mensaje').value = d.text;
-        document.getElementById('iconInput').value = d.icon;
+        document.getElementById('iconInput').value = d.icon || '';
+        document.getElementById('color').value = d.color || '#ffffff';
+        document.getElementById('colorMode').value = d.colorMode || 'solid';
+        toggleColor();
         showTab('messenger');
     }
+
     function borrar(n) {
+        if(!confirm(`¿Borrar "${n}"?`)) return;
         let r = JSON.parse(localStorage.getItem('rapidos'));
         delete r[n];
         localStorage.setItem('rapidos', JSON.stringify(r));
@@ -162,17 +201,25 @@
             const d = document.createElement('div');
             d.className = 'icon-item';
             d.innerHTML = `<img src="https://developer.lametric.com/content/apps/icon_thumbs/${id}.png"><span>#${id}</span>`;
-            d.onclick = () => { document.getElementById('iconInput').value = id; showTab('messenger'); };
+            d.onclick = () => { 
+                document.getElementById('iconInput').value = id; 
+                showTab('messenger'); 
+            };
             g.appendChild(d);
         });
     }
+
     function showTab(t) {
         document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
         document.getElementById(t).classList.add('active');
         event.currentTarget.classList.add('active');
     }
-    function toggleColor() { document.getElementById('pickerBox').style.opacity = document.getElementById('colorMode').value === 'rainbow' ? '0.3' : '1'; }
+
+    function toggleColor() { 
+        document.getElementById('pickerBox').style.opacity = document.getElementById('colorMode').value === 'rainbow' ? '0.3' : '1'; 
+    }
+
     function guardarSet() {
         localStorage.setItem('ad_user', document.getElementById('ad_user').value.trim());
         localStorage.setItem('ad_key', document.getElementById('ad_key').value.trim());
