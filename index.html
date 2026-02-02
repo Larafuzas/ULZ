@@ -8,80 +8,115 @@
     <link rel="apple-touch-icon" href="icon.png">
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
-        :root { --primary: #007AFF; --bg: #000000; --card: #1c1c1e; --text: #ffffff; --pastel: #ADE1F5; --danger: #FF3B30; }
+        :root { --primary: #007AFF; --bg: #000000; --card: #1c1c1e; --text: #ffffff; --pastel: #ADE1F5; --danger: #FF3B30; --success: #34C759; --gray: #8e8e93; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); padding-bottom: 50px; }
+        
+        /* TABS */
         .tabs { display: flex; background: #111; border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 100; overflow-x: auto; }
         .tab { flex: 1; padding: 18px; text-align: center; cursor: pointer; color: #888; font-weight: 600; min-width: 90px; }
         .tab.active { color: var(--pastel); border-bottom: 3px solid var(--pastel); background: rgba(173, 225, 245, 0.05); }
-        .content { padding: 20px; display: none; max-width: 800px; margin: 0 auto; }
+
+        .content { padding: 20px; display: none; max-width: 800px; margin: 0 auto; animation: fadeIn 0.3s; }
         .content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         .card { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid #2c2c2e; margin-bottom: 20px; }
-        h3 { margin-top: 0; color: var(--pastel); }
+        h3 { margin-top: 0; color: var(--pastel); font-size: 1.1rem; }
+        
         label { display: block; font-size: 0.7rem; color: #aaa; margin-top: 15px; font-weight: bold; text-transform: uppercase; }
-        input, select, button { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #333; border-radius: 12px; font-size: 1rem; box-sizing: border-box; background: #2c2c2e; color: white; outline: none; }
+        input, select, button { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #333; border-radius: 12px; font-size: 1rem; box-sizing: border-box; background: #2c2c2e; color: white; outline: none; transition: 0.2s; }
+        button:active { transform: scale(0.98); }
+        
         .grid-params { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .send-btn { background: var(--primary); border: none; font-weight: bold; margin-top: 25px; height: 60px; font-size: 1.1rem; cursor: pointer; }
+        
+        /* ICONOS */
         .icon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
         .icon-item { background: #2c2c2e; padding: 10px; border-radius: 12px; text-align: center; cursor: pointer; border: 1px solid #444; }
         .icon-item img { width: 40px; height: 40px; image-rendering: pixelated; background: #000; border-radius: 4px; }
-        #status { text-align: center; font-size: 0.75rem; color: #666; margin-top: 15px; }
+        .icon-item span { display: block; font-size: 0.6rem; margin-top: 5px; color: #888; }
+
+        /* LISTADO */
         .msg-item { display: flex; justify-content: space-between; align-items: center; background: #2c2c2e; padding: 12px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #444; }
-        .delete-btn { background: var(--danger); border: none; padding: 6px 12px; border-radius: 8px; width: auto; cursor: pointer; }
+        .delete-btn { background: var(--danger); border: none; padding: 6px 12px; border-radius: 8px; width: auto; font-size: 0.75rem; cursor: pointer; }
+
+        #status { text-align: center; font-size: 0.75rem; color: #666; margin-top: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="tabs">
     <div class="tab active" onclick="showTab('messenger')">Control</div>
-    <div class="tab" onclick="showTab('saved-msgs')">Mensajes</div>
+    <div class="tab" onclick="showTab('saved-msgs')">Favoritos</div>
     <div class="tab" onclick="showTab('library')">Iconos</div>
     <div class="tab" onclick="showTab('settings')">Ajustes</div>
 </div>
 
 <div id="messenger" class="content active">
     <div class="card">
-        <h3>Enviar Notificación</h3>
+        <h3>Nueva Notificación</h3>
         <label>Mensaje</label>
-        <input type="text" id="mensaje" placeholder="Escribe un mensaje...">
+        <input type="text" id="mensaje" placeholder="Hola Awtrix!">
+        
         <div class="grid-params">
-            <div><label>Color</label><select id="colorMode" onchange="toggleColor()"><option value="solid">Sólido</option><option value="rainbow">Arcoíris</option></select></div>
-            <div id="pickerBox"><label>&nbsp;</label><input type="color" id="color" value="#ffffff" style="height: 48px;"></div>
+            <div>
+                <label>Color</label>
+                <select id="colorMode" onchange="toggleColor()">
+                    <option value="solid">Sólido</option>
+                    <option value="rainbow">Arcoíris</option>
+                </select>
+            </div>
+            <div id="pickerBox"><label>&nbsp;</label><input type="color" id="color" value="#ffffff" style="height: 48px; padding: 2px;"></div>
         </div>
+
         <div class="grid-params">
-            <div><label>Icono</label><input type="text" id="iconInput" placeholder="ID (ej: 1338)"></div>
-            <div><label>Posición</label><select id="pushIcon"><option value="0">Izq</option><option value="1">Der</option></select></div>
+            <div><label>Icono ID</label><input type="text" id="iconInput" placeholder="Ej: 1338"></div>
+            <div><label>Posición</label><select id="pushIcon"><option value="0">Izquierda</option><option value="1">Derecha</option></select></div>
         </div>
+
         <button class="send-btn" onclick="enviarMQTT()">ENVIAR AL RELOJ</button>
-        <button onclick="guardarFav()" style="background: #34C759; margin-top: 10px; border:none; cursor:pointer; font-weight:bold;">💾 GUARDAR FAVORITO</button>
-        <div id="status">Desconectado</div>
+        
+        <div class="grid-params" style="margin-top: 10px;">
+            <button onclick="limpiarFeed()" style="background: var(--gray); border:none; cursor:pointer; font-weight: bold;">🧹 LIMPIAR / RESET</button>
+            <button onclick="guardarFav()" style="background: var(--success); border:none; cursor:pointer; font-weight: bold;">💾 GUARDAR FAV</button>
+        </div>
+        
+        <div id="status">Iniciando...</div>
     </div>
 </div>
 
 <div id="saved-msgs" class="content">
-    <div class="card"><h3>Favoritos</h3><div id="listado"></div></div>
+    <div class="card">
+        <h3>Mensajes Guardados</h3>
+        <div id="listado"></div>
+    </div>
 </div>
 
 <div id="library" class="content">
-    <div class="card" style="background: rgba(0,122,255,0.1); border-color: var(--primary);">
-        <h3>Galería LaMetric</h3>
-        <a href="https://developer.lametric.com/icons" target="_blank"><button style="background:var(--primary); border:none; cursor:pointer;">BUSCAR ICONOS ↗</button></a>
+    <div class="card" style="border-color: var(--primary); background: rgba(0, 122, 255, 0.1);">
+        <h3>Lameric Icon Gallery</h3>
+        <p style="font-size: 0.8rem; color: #ccc;">Busca el ID en la web oficial y pégalo en Control.</p>
+        <a href="https://developer.lametric.com/icons" target="_blank"><button style="background: var(--primary); border:none; font-weight: bold; cursor:pointer;">ABRIR GALERÍA ↗</button></a>
     </div>
-    <div class="card"><div id="iconGrid" class="icon-grid"></div></div>
+    <div class="card">
+        <h3>Iconos Rápidos</h3>
+        <div id="iconGrid" class="icon-grid"></div>
+    </div>
 </div>
 
 <div id="settings" class="content">
     <div class="card">
-        <h3>Adafruit Config</h3>
+        <h3>Conexión Adafruit IO</h3>
         <label>Usuario</label><input type="text" id="ad_user" placeholder="Larafuzas">
         <label>AIO Key</label><input type="password" id="ad_key" placeholder="aio_...">
         <label>Feed</label><input type="text" id="ad_feed" value="notify">
-        <button class="send-btn" style="background:#34C759;" onclick="guardarSet()">GUARDAR Y RECONECTAR</button>
+        <button class="send-btn" style="background: var(--success);" onclick="guardarAjustes()">GUARDAR Y RECONECTAR</button>
     </div>
 </div>
 
 <script>
     let client = null;
-    const icons = [1241, 1338, 2125, 6, 259, 1105, 412, 342, 488, 2238, 555, 1, 141, 201, 301, 401];
+    const fastIcons = [1241, 1338, 2125, 6, 259, 1105, 412, 342, 488, 2238, 555, 1, 141, 201, 301, 401];
 
     window.onload = () => {
         document.getElementById('ad_user').value = localStorage.getItem('ad_user') || '';
@@ -95,12 +130,15 @@
     function conectar() {
         const u = localStorage.getItem('ad_user');
         const k = localStorage.getItem('ad_key');
-        if(!u || !k) return;
+        if(!u || !k) {
+            document.getElementById('status').innerText = '⚠️ Configuración incompleta';
+            return;
+        }
 
-        client = mqtt.connect(`wss://io.adafruit.com:443`, { 
-            username: u, 
-            password: k, 
-            clientId: 'web_' + Math.random().toString(16).substr(2,6) 
+        client = mqtt.connect(`wss://io.adafruit.com:443`, {
+            username: u, password: k,
+            clientId: 'web_' + Math.random().toString(16).substr(2, 6),
+            keepalive: 60
         });
 
         client.on('connect', () => {
@@ -108,18 +146,18 @@
             document.getElementById('status').style.color = '#34C759';
         });
 
-        client.on('error', () => {
-            document.getElementById('status').innerText = '🔴 ERROR DE CONEXIÓN';
+        client.on('error', (err) => {
+            document.getElementById('status').innerText = '🔴 ERROR DE AUTENTICACIÓN';
             document.getElementById('status').style.color = '#FF3B30';
+            console.error(err);
         });
     }
 
     function enviarMQTT() {
-        if(!client?.connected) return alert("Revisa la conexión en la pestaña Ajustes.");
+        if(!client?.connected) return alert("No hay conexión. Revisa Ajustes.");
         
         const isR = document.getElementById('colorMode').value === 'rainbow';
         const hex = document.getElementById('color').value;
-        
         const payload = {
             text: document.getElementById('mensaje').value || " ",
             rainbow: isR,
@@ -137,27 +175,42 @@
             payload.pushIcon = parseInt(document.getElementById('pushIcon').value); 
         }
 
+        publishToFeed(payload);
+        
+        const b = document.querySelector('.send-btn');
+        const oldText = b.innerText;
+        b.innerText = "¡ENVIADO!";
+        setTimeout(() => b.innerText = oldText, 1500);
+    }
+
+    function limpiarFeed() {
+        if(!client?.connected) return alert("No conectado.");
+        // Un mensaje con texto de un solo espacio limpia la pantalla del reloj
+        publishToFeed({ "text": " ", "icon": 0, "wakeup": true });
+        
+        const s = document.getElementById('status');
+        const old = s.innerText;
+        s.innerText = "🧹 PANTALLA LIMPIADA";
+        setTimeout(() => s.innerText = old, 2000);
+    }
+
+    function publishToFeed(data) {
         const u = localStorage.getItem('ad_user');
         const f = localStorage.getItem('ad_feed') || 'notify';
         const topic = `${u}/feeds/${f.toLowerCase()}`;
-
-        client.publish(topic, JSON.stringify(payload));
-        
-        const b = document.querySelector('.send-btn');
-        b.innerText = "¡ENVIADO!";
-        setTimeout(() => b.innerText = "ENVIAR AL RELOJ", 1500);
+        client.publish(topic, JSON.stringify(data), { qos: 0 });
     }
 
     // --- FAVORITOS ---
     function guardarFav() {
-        const n = prompt("Nombre para este favorito:");
+        const n = prompt("Nombre del favorito:");
         if(!n) return;
         let r = JSON.parse(localStorage.getItem('rapidos') || '{}');
-        r[n] = { 
-            text: document.getElementById('mensaje').value, 
+        r[n] = {
+            text: document.getElementById('mensaje').value,
             icon: document.getElementById('iconInput').value,
             color: document.getElementById('color').value,
-            colorMode: document.getElementById('colorMode').value
+            mode: document.getElementById('colorMode').value
         };
         localStorage.setItem('rapidos', JSON.stringify(r));
         renderFavs();
@@ -170,24 +223,24 @@
         for(let n in r) {
             const d = document.createElement('div');
             d.className = 'msg-item';
-            d.innerHTML = `<span style="cursor:pointer; font-weight:bold; color:var(--pastel);" onclick="cargar('${n}')">${n}</span>
-                           <button class="delete-btn" onclick="borrar('${n}')">Borrar</button>`;
+            d.innerHTML = `<span style="cursor:pointer; font-weight:bold; color:var(--pastel);" onclick="cargarFav('${n}')">${n}</span>
+                           <button class="delete-btn" onclick="borrarFav('${n}')">Borrar</button>`;
             c.appendChild(d);
         }
     }
 
-    function cargar(n) {
+    function cargarFav(n) {
         const d = JSON.parse(localStorage.getItem('rapidos'))[n];
         document.getElementById('mensaje').value = d.text;
         document.getElementById('iconInput').value = d.icon || '';
         document.getElementById('color').value = d.color || '#ffffff';
-        document.getElementById('colorMode').value = d.colorMode || 'solid';
+        document.getElementById('colorMode').value = d.mode || 'solid';
         toggleColor();
         showTab('messenger');
     }
 
-    function borrar(n) {
-        if(!confirm(`¿Borrar "${n}"?`)) return;
+    function borrarFav(n) {
+        if(!confirm(`¿Eliminar "${n}"?`)) return;
         let r = JSON.parse(localStorage.getItem('rapidos'));
         delete r[n];
         localStorage.setItem('rapidos', JSON.stringify(r));
@@ -197,14 +250,11 @@
     // --- UI ---
     function renderIconos() {
         const g = document.getElementById('iconGrid');
-        icons.forEach(id => {
+        fastIcons.forEach(id => {
             const d = document.createElement('div');
             d.className = 'icon-item';
             d.innerHTML = `<img src="https://developer.lametric.com/content/apps/icon_thumbs/${id}.png"><span>#${id}</span>`;
-            d.onclick = () => { 
-                document.getElementById('iconInput').value = id; 
-                showTab('messenger'); 
-            };
+            d.onclick = () => { document.getElementById('iconInput').value = id; showTab('messenger'); };
             g.appendChild(d);
         });
     }
@@ -220,7 +270,7 @@
         document.getElementById('pickerBox').style.opacity = document.getElementById('colorMode').value === 'rainbow' ? '0.3' : '1'; 
     }
 
-    function guardarSet() {
+    function guardarAjustes() {
         localStorage.setItem('ad_user', document.getElementById('ad_user').value.trim());
         localStorage.setItem('ad_key', document.getElementById('ad_key').value.trim());
         localStorage.setItem('ad_feed', document.getElementById('ad_feed').value.trim());
