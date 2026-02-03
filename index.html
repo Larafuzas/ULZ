@@ -11,114 +11,47 @@
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     
     <style>
+        /* --- ESTILOS (Idénticos a la v3.1) --- */
         :root {
-            /* Paleta Pastel Moderna */
-            --bg-body: #F4F6F8;
-            --bg-card: #FFFFFF;
-            --text-primary: #2C3E50;
-            --text-secondary: #95A5A6;
-            --accent-blue: #AED6F1;
-            --accent-blue-dark: #5DADE2;
-            --accent-green: #A9DFBF;
-            --accent-red: #F5B7B1;
-            --input-bg: #F8F9F9;
-            --border: #EBEDEF;
-            --radius: 16px;
-            --shadow: 0 4px 20px rgba(0,0,0,0.05);
+            --bg-body: #F4F6F8; --bg-card: #FFFFFF; --text-primary: #2C3E50;
+            --text-secondary: #95A5A6; --accent-blue: #AED6F1; --accent-blue-dark: #5DADE2;
+            --accent-green: #A9DFBF; --accent-red: #F5B7B1; --input-bg: #F8F9F9;
+            --border: #EBEDEF; --radius: 16px; --shadow: 0 4px 20px rgba(0,0,0,0.05);
         }
-
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-primary);
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding-bottom: 80px; /* Espacio para el menú inferior */
+            background-color: var(--bg-body); color: var(--text-primary); margin: 0; padding: 0;
+            min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 80px;
         }
-
-        /* --- Header --- */
         header {
-            background: var(--bg-card);
-            padding: 20px;
-            padding-top: max(20px, env(safe-area-inset-top));
-            text-align: center;
-            box-shadow: 0 1px 10px rgba(0,0,0,0.03);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            background: var(--bg-card); padding: 20px; padding-top: max(20px, env(safe-area-inset-top));
+            text-align: center; box-shadow: 0 1px 10px rgba(0,0,0,0.03); position: sticky; top: 0; z-index: 100;
         }
-
         h1 { margin: 0; font-size: 1.1rem; font-weight: 600; color: var(--text-primary); }
-
         .status-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: var(--text-secondary);
-            margin-right: 6px;
-            transition: background-color 0.3s;
+            display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+            background-color: var(--text-secondary); margin-right: 6px; transition: background-color 0.3s;
         }
         .status-dot.connected { background-color: #58D68D; }
         .status-dot.error { background-color: #E74C3C; }
-
-        /* --- Tabs Logic --- */
         .tab-content { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
         .tab-content.active { display: block; }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- Cards & Inputs --- */
         .card {
-            background: var(--bg-card);
-            border-radius: var(--radius);
-            padding: 20px;
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
+            background: var(--bg-card); border-radius: var(--radius); padding: 20px;
+            box-shadow: var(--shadow); margin-bottom: 20px;
         }
-
         .input-group { margin-bottom: 15px; }
-        
-        label {
-            display: block;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
+        label { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 500; }
         input[type="text"], input[type="number"], input[type="password"], select {
-            width: 100%;
-            padding: 14px;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            background: var(--input-bg);
-            font-size: 1rem;
-            color: var(--text-primary);
-            outline: none;
-            transition: border 0.2s;
+            width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 12px;
+            background: var(--input-bg); font-size: 1rem; color: var(--text-primary); outline: none; transition: border 0.2s;
         }
-
         input:focus { border-color: var(--accent-blue-dark); }
-
-        /* --- Botones --- */
         .btn {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
             transition: transform 0.1s, opacity 0.2s;
         }
         .btn:active { transform: scale(0.98); }
@@ -127,66 +60,36 @@
         .btn-danger { background-color: var(--accent-red); color: #C0392B; }
         .btn-success { background-color: var(--accent-green); color: #196F3D; }
         .btn-row { display: flex; gap: 10px; margin-top: 10px; }
-
-        /* --- Icon Grid Styles --- */
-        .icon-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
+        .icon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
         .icon-item {
-            background: var(--input-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.1s;
+            background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px; padding: 8px;
+            text-align: center; cursor: pointer; transition: transform 0.1s;
         }
         .icon-item:active { transform: scale(0.95); background: var(--accent-blue); }
         .icon-item img { width: 100%; height: auto; border-radius: 4px; image-rendering: pixelated; }
         .icon-id { font-size: 0.65rem; color: var(--text-secondary); margin-top: 5px; font-family: monospace; }
-        
         .external-link {
-            display: block;
-            text-align: center;
-            color: var(--accent-blue-dark);
-            text-decoration: none;
-            font-size: 0.9rem;
-            margin-top: 20px;
-            padding: 15px;
-            background: var(--input-bg);
-            border-radius: 12px;
+            display: block; text-align: center; color: var(--accent-blue-dark); text-decoration: none;
+            font-size: 0.9rem; margin-top: 20px; padding: 15px; background: var(--input-bg); border-radius: 12px;
         }
-
-        /* --- Custom Inputs --- */
         .color-picker-wrapper { display: flex; align-items: center; background: var(--input-bg); border-radius: 12px; padding: 5px; border: 1px solid var(--border); }
         input[type="color"] { border: none; width: 40px; height: 40px; background: none; cursor: pointer; }
         .checkbox-wrapper { display: flex; align-items: center; gap: 10px; padding: 10px 0; }
         input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent-blue-dark); }
-
-        /* --- Presets List --- */
         .preset-item { display: flex; justify-content: space-between; align-items: center; background: var(--input-bg); padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border); }
         .preset-info { flex-grow: 1; }
         .preset-title { font-weight: 600; font-size: 0.95rem; }
         .preset-detail { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; }
         .preset-actions { display: flex; gap: 10px; }
         .icon-btn { background: none; border: none; cursor: pointer; padding: 5px; color: var(--text-secondary); }
-
-        /* --- Navigation Bar --- */
         nav {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
-            border-top: 1px solid var(--border);
-            display: flex; justify-content: space-around;
-            padding-bottom: max(10px, env(safe-area-inset-bottom));
-            padding-top: 10px; z-index: 100;
+            position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border); display: flex; justify-content: space-around;
+            padding-bottom: max(10px, env(safe-area-inset-bottom)); padding-top: 10px; z-index: 100;
         }
         .nav-item { flex: 1; text-align: center; color: var(--text-secondary); font-size: 0.65rem; cursor: pointer; padding: 5px; }
         .nav-item.active { color: var(--accent-blue-dark); }
         .nav-icon { display: block; width: 24px; height: 24px; margin: 0 auto 4px; fill: currentColor; }
-
     </style>
 </head>
 <body>
@@ -234,11 +137,12 @@
             <div style="display:flex; gap:10px;">
                 <select id="soundSelect" style="flex:1">
                     <option value="">Sin Sonido</option>
-                    <option value="beep">Beep</option>
-                    <option value="ding">Ding</option>
-                    <option value="r2d2">R2D2</option>
-                    <option value="celek">Celek</option>
-                    <option value="mario">Mario</option>
+                    <option value="beep">Beep (Simple)</option>
+                    <option value="ding">Ding Dong</option>
+                    <option value="mario">Mario Coin</option>
+                    <option value="starwars">Star Wars</option>
+                    <option value="nokia">Nokia</option>
+                    <option value="tetris">Tetris</option>
                 </select>
                 <input type="number" id="durationInput" value="5" placeholder="Seg" style="width:80px;">
             </div>
@@ -281,8 +185,7 @@
 <section id="tab-icons" class="tab-content">
     <div class="card">
         <label>Iconos Populares</label>
-        <div class="icon-grid" id="iconGrid">
-            </div>
+        <div class="icon-grid" id="iconGrid"></div>
     </div>
     
     <a href="https://developer.lametric.com/icons" target="_blank" class="external-link">
@@ -307,7 +210,7 @@
             <label>Broker URL (Websocket)</label>
             <input type="text" id="mqttBroker" value="wss://broker.emqx.io:8084/mqtt">
             <span style="font-size:0.75rem; color:#E74C3C; display:block; margin-top:5px;">
-                *NO usar puerto 1883 aquí. Los navegadores web requieren 8083/8084 para conectar.
+                *NO usar puerto 1883. Usar 8083 o 8084 para Web.
             </span>
         </div>
 
@@ -345,17 +248,20 @@
 </nav>
 
 <script>
+    // --- PARTITURAS RTTTL (La solución para relojes vacíos) ---
+    const RTTTL_LIBRARY = {
+        'beep': 'Beep:d=4,o=5,b=160:16p,16c5',
+        'ding': 'DingDong:d=4,o=5,b=100:32p,16e6,16c6',
+        'mario': 'MarioCoin:d=4,o=5,b=100:32p,16b5,16e6',
+        'starwars': 'StarWars:d=4,o=5,b=45:32p,32f5,32f5,32f5,8b.5,16f.5,32e5,32d#5,32c#5,8b.5,16f.5,32e5,32d#5,32c#5,8b.5,16f.5,32e5,32d#5,32e5,8c#.5',
+        'nokia': 'Nokia:d=4,o=5,b=160:8e6,8d6,16f#,16g#,8c#6,8b5,16d,16e,8b,8a,16c#,16e,2a',
+        'tetris': 'Tetris:d=4,o=5,b=160:e6,8b,8c6,8d6,16e6,16d6,8c6,8b,a,8a,8c6,e6,8d6,8c6,b,8b,8c6,d6,e6,c6,a,2a,8p,d6,8f6,a6,8g6,8f6,e6,8c6,e6,8d6,8c6,b,8b,8c6,d6,e6,c6,a,2a'
+    };
+
     // --- VARIABLES GLOBALES ---
     let client = null;
-    let config = {
-        prefix: '',
-        broker: 'wss://broker.emqx.io:8084/mqtt',
-        user: '',
-        pass: ''
-    };
+    let config = { prefix: '', broker: 'wss://broker.emqx.io:8084/mqtt', user: '', pass: '' };
     let presets = [];
-
-    // --- CURATED ICON LIST (Fuente: LaMetric) ---
     const curatedIcons = [
         {id: "626", name: "Sun"}, {id: "2356", name: "Rain"}, {id: "2350", name: "Storm"}, {id: "12563", name: "Snow"},
         {id: "52", name: "Smile"}, {id: "2474", name: "Heart"}, {id: "77", name: "Warning"}, {id: "356", name: "Check"},
@@ -368,28 +274,23 @@
         {id: "392", name: "Car"}, {id: "282", name: "Bike"}, {id: "740", name: "Run"}, {id: "1165", name: "Gym"}
     ];
 
-    // --- INICIALIZACIÓN ---
     document.addEventListener('DOMContentLoaded', () => {
         loadSettings();
         loadPresets();
         updatePresetsUI();
         renderIcons();
-        
         if(!config.prefix) {
-            alert('Por favor configura el PREFIJO en Ajustes para empezar.');
-            // Simular click en la pestaña de ajustes (indice 3 en array base 0)
+            alert('Por favor configura el PREFIJO en Ajustes.');
             document.querySelectorAll('.nav-item')[3].click();
         } else {
             connectMQTT();
         }
     });
 
-    // --- LÓGICA DE ICONOS ---
     function renderIcons() {
-        const grid = document.getElementById('iconGrid');
-        grid.innerHTML = curatedIcons.map(icon => `
+        document.getElementById('iconGrid').innerHTML = curatedIcons.map(icon => `
             <div class="icon-item" onclick="selectIcon('${icon.id}')">
-                <img src="https://developer.lametric.com/content/apps/icon_thumbs/${icon.id}.png" loading="lazy" alt="${icon.name}">
+                <img src="https://developer.lametric.com/content/apps/icon_thumbs/${icon.id}.png" loading="lazy">
                 <div class="icon-id">${icon.id}</div>
             </div>
         `).join('');
@@ -397,25 +298,19 @@
 
     function selectIcon(id) {
         document.getElementById('iconInput').value = id;
-        // Volver a la pestaña Panel
         document.querySelectorAll('.nav-item')[0].click();
-        
-        // Pequeña animación de feedback en el campo
         const input = document.getElementById('iconInput');
         input.style.backgroundColor = '#e8f8f5';
         setTimeout(() => input.style.backgroundColor = '', 500);
     }
 
-    // --- LÓGICA DE PESTAÑAS ---
     function switchTab(tabId, navElement) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        
         document.getElementById(tabId).classList.add('active');
         navElement.classList.add('active');
     }
 
-    // --- LÓGICA DE AJUSTES (SEGURIDAD) ---
     function loadSettings() {
         const stored = localStorage.getItem('awtrix_config');
         if (stored) {
@@ -429,94 +324,57 @@
 
     function saveSettings() {
         const rawPrefix = document.getElementById('mqttPrefix').value.trim();
-        const cleanPrefix = rawPrefix.replace(/\/$/, '');
-
         config = {
-            prefix: cleanPrefix,
+            prefix: rawPrefix.replace(/\/$/, ''),
             broker: document.getElementById('mqttBroker').value.trim(),
             user: document.getElementById('mqttUser').value.trim(),
             pass: document.getElementById('mqttPass').value.trim()
         };
-
-        if(!config.prefix) {
-            alert("El prefijo es obligatorio");
-            return;
-        }
-
+        if(!config.prefix) { alert("El prefijo es obligatorio"); return; }
         localStorage.setItem('awtrix_config', JSON.stringify(config));
         document.getElementById('mqttPrefix').value = config.prefix;
-        
         alert('Configuración guardada en local.');
         connectMQTT();
     }
 
-    // --- MQTT ---
     function connectMQTT() {
         const statusDot = document.getElementById('statusDot');
-        
         if (client) { client.end(); }
-
-        const options = {
-            username: config.user,
-            password: config.pass
-        };
-
+        const options = { username: config.user, password: config.pass };
         client = mqtt.connect(config.broker, options);
-
-        client.on('connect', () => {
-            console.log('Conectado');
-            statusDot.className = 'status-dot connected';
-        });
-
-        client.on('error', (err) => {
-            console.error('Error MQTT', err);
-            statusDot.className = 'status-dot error';
-        });
-        
-        client.on('offline', () => {
-            statusDot.className = 'status-dot';
-        });
+        client.on('connect', () => { console.log('Conectado'); statusDot.className = 'status-dot connected'; });
+        client.on('error', (err) => { console.error('Error MQTT', err); statusDot.className = 'status-dot error'; });
+        client.on('offline', () => { statusDot.className = 'status-dot'; });
     }
 
     function sendMessage(payloadOverride = null) {
-        if (!client || !client.connected) {
-            alert("No conectado. Revisa los Ajustes.");
-            return;
-        }
+        if (!client || !client.connected) { alert("No conectado. Revisa los Ajustes."); return; }
 
         let payload = payloadOverride;
-
         if (!payload) {
             const text = document.getElementById('msgText').value;
             const iconVal = document.getElementById('iconInput').value;
             const position = document.getElementById('iconPosition').value;
-            
             if(!text && !iconVal) { alert("Escribe algo..."); return; }
 
             payload = {};
             let finalMessage = text;
 
-            if (position === 'left' && iconVal) {
-                payload.icon = iconVal;
-            } 
-            else if (position === 'right' && iconVal) {
-                finalMessage = `${text} (i:${iconVal})`;
-            } 
-            else if (position === 'both' && iconVal) {
-                payload.icon = iconVal;
-                finalMessage = `${text} (i:${iconVal})`;
-            }
+            if (position === 'left' && iconVal) payload.icon = iconVal;
+            else if (position === 'right' && iconVal) finalMessage = `${text} (i:${iconVal})`;
+            else if (position === 'both' && iconVal) { payload.icon = iconVal; finalMessage = `${text} (i:${iconVal})`; }
 
             payload.text = finalMessage;
             
-            if (document.getElementById('rainbowCheck').checked) {
-                payload.rainbow = true;
-            } else {
-                payload.color = document.getElementById('msgColor').value;
-            }
+            if (document.getElementById('rainbowCheck').checked) payload.rainbow = true;
+            else payload.color = document.getElementById('msgColor').value;
 
-            const sound = document.getElementById('soundSelect').value;
-            if(sound) payload.sound = sound;
+            // --- CORRECCIÓN DE SONIDO ---
+            const soundKey = document.getElementById('soundSelect').value;
+            if(soundKey && RTTTL_LIBRARY[soundKey]) {
+                // Enviamos la partitura cruda (RTTTL) en lugar del nombre del archivo
+                payload.rtttl = RTTTL_LIBRARY[soundKey];
+            }
 
             const duration = document.getElementById('durationInput').value;
             if(duration) payload.duration = parseInt(duration);
@@ -527,14 +385,12 @@
         const topic = `${config.prefix}/notify`;
         client.publish(topic, JSON.stringify(payload));
         
-        // Feedback Visual
         const btn = document.querySelector('.btn-primary');
         const oldColor = btn.style.backgroundColor;
         btn.style.backgroundColor = 'var(--accent-green)';
         setTimeout(() => btn.style.backgroundColor = oldColor, 500);
     }
 
-    // --- PREDEFINIDOS ---
     function loadPresets() {
         const stored = localStorage.getItem('awtrix_presets');
         if (stored) presets = JSON.parse(stored);
@@ -543,10 +399,8 @@
     function saveToPresets() {
         const name = prompt("Nombre para este mensaje:");
         if (!name) return;
-
         const preset = {
-            id: Date.now(),
-            name: name,
+            id: Date.now(), name: name,
             text: document.getElementById('msgText').value,
             icon: document.getElementById('iconInput').value,
             pos: document.getElementById('iconPosition').value,
@@ -555,7 +409,6 @@
             sound: document.getElementById('soundSelect').value,
             duration: document.getElementById('durationInput').value
         };
-
         presets.push(preset);
         localStorage.setItem('awtrix_presets', JSON.stringify(presets));
         updatePresetsUI();
@@ -565,12 +418,7 @@
     function updatePresetsUI() {
         const list = document.getElementById('presetsList');
         list.innerHTML = '';
-
-        if(presets.length === 0) {
-            list.innerHTML = '<div style="text-align:center; color:#aaa; padding:20px;">No hay mensajes guardados</div>';
-            return;
-        }
-
+        if(presets.length === 0) { list.innerHTML = '<div style="text-align:center; color:#aaa; padding:20px;">No hay mensajes guardados</div>'; return; }
         presets.forEach(p => {
             const item = document.createElement('div');
             item.className = 'preset-item';
@@ -580,14 +428,9 @@
                     <div class="preset-detail">${p.text.substring(0, 20)}...</div>
                 </div>
                 <div class="preset-actions">
-                    <button class="icon-btn" onclick="deletePreset(${p.id})">
-                        <svg style="width:20px; height:20px;" viewBox="0 0 24 24"><path fill="#E74C3C" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                    </button>
-                    <button class="icon-btn" onclick="loadAndSend(${p.id})">
-                         <svg style="width:20px; height:20px;" viewBox="0 0 24 24"><path fill="#58D68D" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                    </button>
-                </div>
-            `;
+                    <button class="icon-btn" onclick="deletePreset(${p.id})"><svg style="width:20px; height:20px;" viewBox="0 0 24 24"><path fill="#E74C3C" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+                    <button class="icon-btn" onclick="loadAndSend(${p.id})"><svg style="width:20px; height:20px;" viewBox="0 0 24 24"><path fill="#58D68D" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+                </div>`;
             list.appendChild(item);
         });
     }
@@ -595,7 +438,6 @@
     function loadPreset(id) {
         const p = presets.find(x => x.id === id);
         if(!p) return;
-
         document.getElementById('msgText').value = p.text;
         document.getElementById('iconInput').value = p.icon;
         document.getElementById('iconPosition').value = p.pos;
@@ -603,58 +445,13 @@
         document.getElementById('rainbowCheck').checked = p.rainbow;
         document.getElementById('soundSelect').value = p.sound;
         document.getElementById('durationInput').value = p.duration;
-
         document.querySelectorAll('.nav-item')[0].click();
     }
-
-    function loadAndSend(id) {
-        loadPreset(id);
-        sendMessage();
-    }
-
-    function deletePreset(id) {
-        if(!confirm("¿Borrar?")) return;
-        presets = presets.filter(x => x.id !== id);
-        localStorage.setItem('awtrix_presets', JSON.stringify(presets));
-        updatePresetsUI();
-    }
-
-    function clearAllPresets() {
-        if(!confirm("¿Borrar TODOS los guardados?")) return;
-        presets = [];
-        localStorage.setItem('awtrix_presets', JSON.stringify(presets));
-        updatePresetsUI();
-    }
-
-    function exportPresets() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(presets));
-        const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "awtrix_backup.json");
-        document.body.appendChild(downloadAnchorNode);
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
-    }
-
-    function importPresets(input) {
-        const file = input.files[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const imported = JSON.parse(e.target.result);
-                if(Array.isArray(imported)) {
-                    presets = presets.concat(imported);
-                    localStorage.setItem('awtrix_presets', JSON.stringify(presets));
-                    updatePresetsUI();
-                    alert("Importado con éxito");
-                }
-            } catch(err) {
-                alert("Archivo corrupto o inválido");
-            }
-        };
-        reader.readAsText(file);
-    }
+    function loadAndSend(id) { loadPreset(id); sendMessage(); }
+    function deletePreset(id) { if(!confirm("¿Borrar?")) return; presets = presets.filter(x => x.id !== id); localStorage.setItem('awtrix_presets', JSON.stringify(presets)); updatePresetsUI(); }
+    function clearAllPresets() { if(!confirm("¿Borrar TODOS?")) return; presets = []; localStorage.setItem('awtrix_presets', JSON.stringify(presets)); updatePresetsUI(); }
+    function exportPresets() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(presets)); const downloadAnchorNode = document.createElement('a'); downloadAnchorNode.setAttribute("href", dataStr); downloadAnchorNode.setAttribute("download", "awtrix_backup.json"); document.body.appendChild(downloadAnchorNode); downloadAnchorNode.click(); downloadAnchorNode.remove(); }
+    function importPresets(input) { const file = input.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const imported = JSON.parse(e.target.result); if(Array.isArray(imported)) { presets = presets.concat(imported); localStorage.setItem('awtrix_presets', JSON.stringify(presets)); updatePresetsUI(); alert("Importado"); } } catch(err) { alert("Archivo corrupto"); } }; reader.readAsText(file); }
 </script>
 
 </body>
