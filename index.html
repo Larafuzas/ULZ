@@ -2,133 +2,425 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Awtrix - Control Home Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Awtrix Control</title>
+
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="icon" type="image/png" href="icon.png">
     <style>
-        body { font-family: -apple-system, sans-serif; background: #111; color: #eee; display:flex; justify-content:center; padding-top: 30px; margin: 0; }
-        .card { background: #1c1c1e; padding: 25px; border-radius: 16px; width: 90%; max-width: 400px; border: 1px solid #333; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
-        h2 { margin-top: 0; color: #03A9F4; text-align: center; }
-        label { display: block; font-size: 0.8rem; color: #888; margin-top: 15px; margin-bottom: 5px; }
-        input { width: 100%; padding: 12px; background: #2c2c2e; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; }
-        .flex-row { display: flex; gap: 10px; }
-        button { width: 100%; padding: 15px; margin-top: 25px; background: #03A9F4; color: black; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: 0.2s; }
-        button:active { transform: scale(0.97); }
-        .btn-config { background: #333; color: white; margin-top: 10px; }
-        #status { text-align: center; margin-top: 15px; font-size: 0.85rem; }
-        .success { color: #4CAF50; }
-        .error { color: #F44336; }
-        #config-panel { display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid #444; }
+        /* --- ESTILOS MINIMALISTAS Y MODO DÍA/NOCHE --- */
+        :root {
+            --bg-color: #f2f2f7;
+            --card-bg: #ffffff;
+            --text-color: #000000;
+            --text-muted: #8e8e93;
+            --accent: #007aff;
+            --border: #c6c6c8;
+            --danger: #ff3b30;
+            --tab-bg: #f8f8f8;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #000000;
+                --card-bg: #1c1c1e;
+                --text-color: #ffffff;
+                --text-muted: #8e8e93;
+                --accent: #0a84ff;
+                --border: #38383a;
+                --tab-bg: #121212;
+            }
+        }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; padding-bottom: 80px; -webkit-tap-highlight-color: transparent; env(safe-area-inset-bottom); }
+        
+        /* Contenedores */
+        .tab-content { display: none; padding: 20px; animation: fadeIn 0.2s ease-in-out; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Elementos de formulario */
+        .card { background: var(--card-bg); border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        label:first-child { margin-top: 0; }
+        
+        input[type="text"], input[type="number"], select { width: 100%; padding: 12px; background: var(--bg-color); border: 1px solid var(--border); color: var(--text-color); border-radius: 8px; box-sizing: border-box; font-size: 1rem; appearance: none; }
+        input:focus, select:focus { outline: none; border-color: var(--accent); }
+        
+        .flex-row { display: flex; gap: 12px; align-items: center; }
+        .flex-1 { flex: 1; }
+        
+        /* Checkbox y Color */
+        .checkbox-wrapper { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 0.9rem; }
+        input[type="color"] { width: 100%; height: 44px; padding: 0; border: none; border-radius: 8px; cursor: pointer; background: none; }
+        
+        /* Botones */
+        button { width: 100%; padding: 14px; margin-top: 16px; background: var(--accent); color: white; font-weight: 600; font-size: 1rem; border: none; border-radius: 10px; cursor: pointer; transition: opacity 0.2s; }
+        button:active { opacity: 0.7; }
+        .btn-secondary { background: var(--card-bg); color: var(--accent); border: 1px solid var(--accent); }
+        .btn-danger { background: var(--danger); }
+        .btn-small { padding: 8px 12px; font-size: 0.85rem; margin-top: 0; width: auto; }
+        
+        /* Estado */
+        #status { text-align: center; margin-top: 16px; font-size: 0.85rem; font-weight: 500; height: 20px; }
+        .success { color: #34c759; }
+        .error { color: var(--danger); }
+
+        /* Lista de Guardados */
+        .saved-item { background: var(--card-bg); border-radius: 10px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
+        .saved-info { flex: 1; overflow: hidden; }
+        .saved-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .saved-desc { font-size: 0.8rem; color: var(--text-muted); }
+        .saved-actions { display: flex; gap: 8px; }
+
+        /* Cuadrícula de Iconos */
+        .icon-grid-container { height: 60vh; overflow-y: auto; background: var(--card-bg); border-radius: 12px; padding: 10px; border: 1px solid var(--border); }
+        .icon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .icon-box { background: var(--bg-color); border: 1px solid var(--border); border-radius: 8px; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.75rem; cursor: pointer; color: var(--text-muted); }
+        .icon-box img { width: 60%; image-rendering: pixelated; margin-bottom: 4px; }
+        .icon-box:active { background: var(--border); }
+
+        /* Barra de Pestañas (Bottom Tab Bar) */
+        .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background: var(--tab-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        .tab-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.7rem; width: 33%; height: 100%; cursor: pointer; transition: color 0.2s; }
+        .tab-item svg { width: 24px; height: 24px; margin-bottom: 4px; fill: currentColor; }
+        .tab-item.active { color: var(--accent); }
+
+        /* Modal Configuración */
+        #configModal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg-color); z-index: 100; padding: 20px; padding-top: 50px; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom); }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Control Awtrix (Local)</h2>
-    
-    <label>Mensaje a enviar</label>
-    <input type="text" id="msg" placeholder="Ej: La cena está lista">
-    
-    <div class="flex-row">
-        <div style="flex:1">
-            <label>Icono (ID)</label>
-            <input type="number" id="icon" placeholder="Ej: 62">
+    <div id="tab1" class="tab-content active">
+        <div class="card">
+            <label>Mensaje</label>
+            <input type="text" id="msgText" placeholder="Escribe algo...">
+            
+            <div class="flex-row" style="margin-top: 12px;">
+                <div class="flex-1">
+                    <label>Icono (ID/Nombre)</label>
+                    <input type="text" id="msgIcon" placeholder="Ej: 62">
+                </div>
+                <div class="flex-1">
+                    <label>Color</label>
+                    <input type="color" id="msgColor" value="#ffffff">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="msgRainbow"> <label style="margin:0; text-transform:none;">Rainbow 🌈</label>
+                    </div>
+                </div>
+            </div>
+
+            <label>Sonido</label>
+            <select id="msgSound">
+                <option value="">Ninguno</option>
+                <option value="beep">Beep</option>
+                <option value="tone">Tone</option>
+                <option value="alert">Alert</option>
+                <option value="ring">Ring</option>
+                <option value="notification">Notification</option>
+                <option value="alarm">Alarm</option>
+            </select>
+
+            <div class="flex-row" style="margin-top: 12px;">
+                <div class="flex-1">
+                    <label>Duración (seg)</label>
+                    <input type="number" id="msgDuration" value="10" min="1">
+                </div>
+                <div class="flex-1">
+                    <label>Repeticiones</label>
+                    <input type="number" id="msgRepeat" value="1" min="1">
+                </div>
+            </div>
         </div>
-        <div style="flex:1">
-            <label>Color</label>
-            <input type="color" id="color" value="#FFFFFF" style="height:43px; padding:0; cursor:pointer;">
+
+        <button onclick="enviarMensaje()">ENVIAR AL RELOJ 🚀</button>
+        <button class="btn-secondary" onclick="guardarMensaje()">Guardar Configuración 💾</button>
+        <div id="status">Listo</div>
+    </div>
+
+    <div id="tab2" class="tab-content">
+        <h3 style="margin-top:0">Mensajes Guardados</h3>
+        <div id="savedList">
+            </div>
+        <p id="noSavedMsg" style="text-align:center; color:var(--text-muted); font-size:0.9rem;">No hay mensajes guardados.</p>
+
+        <button class="btn-secondary" onclick="exportarBackup()" style="margin-top: 20px;">⬇️ Exportar Backup</button>
+        <button onclick="abrirConfig()" style="margin-top: 10px; background-color: #34c759;">⚙️ Configuración de Conexión</button>
+    </div>
+
+    <div id="tab3" class="tab-content">
+        <h3 style="margin-top:0">Mis Iconos Frecuentes</h3>
+        <div class="icon-grid-container">
+            <div class="icon-grid" id="iconGrid">
+                </div>
+        </div>
+        <button class="btn-secondary" onclick="window.open('https://developer.lametric.com/icons', '_blank')">🌐 Ver Más Iconos (LaMetric)</button>
+    </div>
+
+    <div id="configModal">
+        <h2 style="margin-top:0">Datos Privados (Local)</h2>
+        <p style="font-size:0.85rem; color:var(--text-muted);">Estos datos no salen de tu teléfono.</p>
+        
+        <div class="card">
+            <label>URL Home Assistant (con https://)</label>
+            <input type="text" id="confUrl" placeholder="https://tu-casa.ui.nabu.casa">
+            
+            <label>Token de Larga Duración</label>
+            <input type="password" id="confToken" placeholder="eyJhbGciOiJIUzI1NiIs...">
+            
+            <label>Topic MQTT del Reloj</label>
+            <input type="text" id="confTopic" placeholder="larafuzas_casa/notify">
+        </div>
+
+        <button onclick="guardarConfig()">Guardar y Cerrar</button>
+        <button class="btn-danger" onclick="cerrarConfig()" style="margin-top:10px;">Cancelar</button>
+    </div>
+
+    <div class="tab-bar">
+        <div class="tab-item active" onclick="switchTab(1)">
+            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            Enviar
+        </div>
+        <div class="tab-item" onclick="switchTab(2)">
+            <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+            Guardados
+        </div>
+        <div class="tab-item" onclick="switchTab(3)">
+            <svg viewBox="0 0 24 24"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
+            Iconos
         </div>
     </div>
 
-    <button onclick="enviarHA()">ENVIAR AL RELOJ 🚀</button>
-    <button class="btn-config" onclick="toggleConfig()">⚙️ Configuración de Conexión</button>
-
-    <div id="status">Esperando envío...</div>
-
-    <div id="config-panel">
-        <label>URL de Home Assistant</label>
-        <input type="text" id="ha_url" placeholder="http://192.168.1.100:8123">
+    <script>
+        // Asegurarse de que el archivo icon.png existe en la raíz si se va a depurar en PC
         
-        <label>Token de Larga Duración</label>
-        <input type="password" id="ha_token" placeholder="eyJhbGciOiJIUzI1NiIsInR5c...">
-        
-        <label>Topic MQTT del Reloj</label>
-        <input type="text" id="ha_topic" placeholder="awtrix_XXXX/notify">
-        
-        <button class="btn-config" onclick="guardarConfig()">Guardar Configuración</button>
-    </div>
-</div>
-
-<script>
-    // Cargar datos guardados al abrir
-    window.onload = () => {
-        document.getElementById('ha_url').value = localStorage.getItem('ha_url') || '';
-        document.getElementById('ha_token').value = localStorage.getItem('ha_token') || '';
-        document.getElementById('ha_topic').value = localStorage.getItem('ha_topic') || 'awtrix/notify';
-    };
-
-    function toggleConfig() {
-        const panel = document.getElementById('config-panel');
-        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function guardarConfig() {
-        localStorage.setItem('ha_url', document.getElementById('ha_url').value.replace(/\/$/, ""));
-        localStorage.setItem('ha_token', document.getElementById('ha_token').value);
-        localStorage.setItem('ha_topic', document.getElementById('ha_topic').value);
-        toggleConfig();
-        document.getElementById('status').innerHTML = "<span class='success'>Configuración guardada</span>";
-    }
-
-    async function enviarHA() {
-        const url = localStorage.getItem('ha_url');
-        const token = localStorage.getItem('ha_token');
-        const topic = localStorage.getItem('ha_topic');
-
-        if (!url || !token || !topic) {
-            document.getElementById('status').innerHTML = "<span class='error'>Falta configuración. Abre el panel ⚙️</span>";
-            return;
+        // --- 1. NAVEGACIÓN DE PESTAÑAS ---
+        function switchTab(tabIndex) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('tab' + tabIndex).classList.add('active');
+            document.querySelectorAll('.tab-item')[tabIndex - 1].classList.add('active');
+            window.scrollTo(0,0); // Volver arriba al cambiar de pestaña
         }
 
-        const text = document.getElementById('msg').value || " ";
-        const icon = document.getElementById('icon').value;
-        const hex = document.getElementById('color').value;
+        // --- 2. GESTIÓN DE CONFIGURACIÓN PRIVADA ---
+        function abrirConfig() {
+            document.getElementById('confUrl').value = localStorage.getItem('ha_url') || '';
+            document.getElementById('confToken').value = localStorage.getItem('ha_token') || '';
+            document.getElementById('confTopic').value = localStorage.getItem('ha_topic') || '';
+            document.getElementById('configModal').style.display = 'block';
+        }
 
-        // Construir el JSON del mensaje para el reloj
-        const awtrixPayload = {
-            text: text,
-            wakeup: true,
-            color: [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)]
-        };
-        if (icon) awtrixPayload.icon = icon;
+        function cerrarConfig() {
+            document.getElementById('configModal').style.display = 'none';
+        }
 
-        // Construir la petición para la API de Home Assistant
-        const haBody = {
-            topic: topic,
-            payload: JSON.stringify(awtrixPayload)
-        };
+        function guardarConfig() {
+            let url = document.getElementById('confUrl').value.replace(/\/$/, "").trim();
+            localStorage.setItem('ha_url', url);
+            localStorage.setItem('ha_token', document.getElementById('confToken').value.trim());
+            localStorage.setItem('ha_topic', document.getElementById('confTopic').value.trim());
+            cerrarConfig();
+            mostrarEstado("✅ Configuración guardada", "success");
+        }
 
-        document.getElementById('status').innerHTML = "Enviando...";
+        // --- 3. ENVÍO AL RELOJ (API HOME ASSISTANT) ---
+        function mostrarEstado(msg, tipo) {
+            const statusEl = document.getElementById('status');
+            statusEl.innerHTML = `<span class="${tipo}">${msg}</span>`;
+            setTimeout(() => { statusEl.innerHTML = "Listo"; }, 4000);
+        }
 
-        try {
-            const response = await fetch(`${url}/api/services/mqtt/publish`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(haBody)
-            });
+        async function enviarPayload(payload) {
+            const url = localStorage.getItem('ha_url');
+            const token = localStorage.getItem('ha_token');
+            const topic = localStorage.getItem('ha_topic');
 
-            if (response.ok) {
-                document.getElementById('status').innerHTML = "<span class='success'>✅ Mensaje enviado</span>";
-            } else {
-                document.getElementById('status').innerHTML = `<span class='error'>❌ Error: ${response.statusText}</span>`;
+            if (!url || !token || !topic) {
+                switchTab(2);
+                abrirConfig();
+                alert("Primero debes configurar los datos de conexión localmente.");
+                return;
             }
-        } catch (error) {
-            document.getElementById('status').innerHTML = `<span class='error'>❌ Error de conexión. Revisa la URL.</span>`;
-            console.error(error);
+
+            const haBody = { topic: topic, payload: JSON.stringify(payload) };
+            mostrarEstado("Enviando...", "text-muted");
+
+            try {
+                // Pequeño hack para iOS: forzar un ligero retraso para que la animación de "Enviando" se vea
+                await new Promise(r => setTimeout(r, 100));
+
+                const response = await fetch(`${url}/api/services/mqtt/publish`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(haBody)
+                });
+
+                if (response.ok) mostrarEstado("✅ ¡Mensaje enviado!", "success");
+                else mostrarEstado(`❌ Error ${response.status}: Revisa la configuración`, "error");
+            } catch (error) {
+                mostrarEstado("❌ Error de red (¿CORS en HA o URL incorrecta?)", "error");
+                console.error(error);
+            }
         }
-    }
-</script>
+
+        function enviarMensaje() {
+            const text = document.getElementById('msgText').value || " ";
+            const icon = document.getElementById('msgIcon').value;
+            const hex = document.getElementById('msgColor').value;
+            const rainbow = document.getElementById('msgRainbow').checked;
+            const sound = document.getElementById('msgSound').value;
+            const duration = parseInt(document.getElementById('msgDuration').value) || 10;
+            const repeat = parseInt(document.getElementById('msgRepeat').value) || 1;
+
+            const payload = {
+                text: text,
+                wakeup: true,
+                duration: duration,
+                repeat: repeat,
+                color: [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)]
+            };
+
+            if (rainbow) payload.rainbow = true;
+            if (icon) payload.icon = icon;
+            if (sound) payload.sound = sound;
+
+            enviarPayload(payload);
+        }
+
+        // --- 4. GESTIÓN DE MENSAJES GUARDADOS ---
+        let mensajesGuardados = JSON.parse(localStorage.getItem('saved_msgs')) || [];
+
+        function guardarMensaje() {
+            if(!document.getElementById('msgText').value && !document.getElementById('msgIcon').value) {
+                alert("Añade al menos un texto o icono para guardar."); return;
+            }
+            
+            const msgObj = {
+                id: Date.now(),
+                text: document.getElementById('msgText').value,
+                icon: document.getElementById('msgIcon').value,
+                color: document.getElementById('msgColor').value,
+                rainbow: document.getElementById('msgRainbow').checked,
+                sound: document.getElementById('msgSound').value,
+                duration: document.getElementById('msgDuration').value,
+                repeat: document.getElementById('msgRepeat').value
+            };
+
+            mensajesGuardados.push(msgObj);
+            localStorage.setItem('saved_msgs', JSON.stringify(mensajesGuardados));
+            renderSaved();
+            mostrarEstado("💾 Guardado en pestaña 2", "success");
+        }
+
+        function cargarAlFormulario(id) {
+            const msg = mensajesGuardados.find(m => m.id === id);
+            if(msg) {
+                document.getElementById('msgText').value = msg.text;
+                document.getElementById('msgIcon').value = msg.icon;
+                document.getElementById('msgColor').value = msg.color;
+                document.getElementById('msgRainbow').checked = msg.rainbow;
+                document.getElementById('msgSound').value = msg.sound;
+                document.getElementById('msgDuration').value = msg.duration;
+                document.getElementById('msgRepeat').value = msg.repeat;
+                switchTab(1);
+            }
+        }
+
+        function enviarDirecto(id) {
+            const msg = mensajesGuardados.find(m => m.id === id);
+            if(!msg) return;
+            const payload = {
+                text: msg.text || " ",
+                wakeup: true,
+                duration: parseInt(msg.duration) || 10,
+                repeat: parseInt(msg.repeat) || 1,
+                color: [parseInt(msg.color.slice(1,3),16), parseInt(msg.color.slice(3,5),16), parseInt(msg.color.slice(5,7),16)]
+            };
+            if (msg.rainbow) payload.rainbow = true;
+            if (msg.icon) payload.icon = msg.icon;
+            if (msg.sound) payload.sound = msg.sound;
+            
+            enviarPayload(payload);
+        }
+
+        function borrarMensaje(id) {
+            // Reemplazar confirm por un modal custom minimalista en el futuro si se desea
+            if(confirm("¿Borrar este mensaje guardado?")) {
+                mensajesGuardados = mensajesGuardados.filter(m => m.id !== id);
+                localStorage.setItem('saved_msgs', JSON.stringify(mensajesGuardados));
+                renderSaved();
+            }
+        }
+
+        function renderSaved() {
+            const container = document.getElementById('savedList');
+            const noMsg = document.getElementById('noSavedMsg');
+            container.innerHTML = '';
+            
+            if(mensajesGuardados.length === 0) {
+                noMsg.style.display = 'block';
+            } else {
+                noMsg.style.display = 'none';
+                mensajesGuardados.forEach(msg => {
+                    const desc = `${msg.icon ? 'Ícono: '+msg.icon : 'Sin icono'} | ${msg.sound || 'Sin sonido'} | ${msg.duration}s`;
+                    container.innerHTML += `
+                        <div class="saved-item">
+                            <div class="saved-info" onclick="cargarAlFormulario(${msg.id})">
+                                <div class="saved-title" style="color: ${msg.rainbow ? 'var(--accent)' : msg.color}">${msg.text || '[Solo Icono]'}</div>
+                                <div class="saved-desc">${desc}</div>
+                            </div>
+                            <div class="saved-actions">
+                                <button class="btn-small" onclick="enviarDirecto(${msg.id})">🚀</button>
+                                <button class="btn-small btn-danger" onclick="borrarMensaje(${msg.id})">🗑️</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        // --- 5. BACKUP ---
+        function exportarBackup() {
+            if(mensajesGuardados.length === 0) { alert("No hay nada que exportar."); return; }
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(mensajesGuardados));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "awtrix_backup.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        // --- 6. GALERÍA DE ICONOS ---
+        const iconosFrecuentes = [54, 87, 314, 1269, 4833, 5029, 2351, 10565, 4390, 16187, 5216, 205];
+        
+        function renderIconGrid() {
+            const grid = document.getElementById('iconGrid');
+            iconosFrecuentes.forEach(id => {
+                grid.innerHTML += `
+                    <div class="icon-box" onclick="seleccionarIcono('${id}')">
+                        <img src="https://developer.lametric.com/content/apps/icon_thumbs/${id}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzg4OCI+PHBhdGggZD0iTTEyIDJDMi4yNyAyIDIgMi4yNyAyIDEydzAgMTBjMCA5LjczLjI3IDEwIDEwIDEwczEwLS4yNyAxMC0xMFYxMmMwLTkuNzMtLjI3LTEwLTEwLTEwem0wIDE4Yy04LjkyIDAtOC45Mi0uMjYtOC45Mi04UzMuMDggNCAxMiA0czguOTIuMjYgOC45Mi 8LS4yNiA4LTguOTIgOHoiLz48L3N2Zz4='">
+                        ID: ${id}
+                    </div>
+                `;
+            });
+        }
+
+        function seleccionarIcono(id) {
+            document.getElementById('msgIcon').value = id;
+            switchTab(1); // Volver a la primera pestaña
+        }
+
+        // Inicialización al cargar la app
+        window.onload = () => {
+            renderSaved();
+            renderIconGrid();
+        };
+    </script>
 </body>
 </html>
