@@ -5,10 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <title>Awtrix Control</title>
+    <title>MSSGs Awtrix</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
 
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="icon" type="image/png" href="icon.png">
+
     <style>
         /* --- ESTILOS MINIMALISTAS Y MODO DÍA/NOCHE --- */
         :root {
@@ -19,7 +24,8 @@
             --accent: #007aff;
             --border: #c6c6c8;
             --danger: #ff3b30;
-            --tab-bg: #f8f8f8;
+            --tab-bg: rgba(248, 248, 248, 0.85);
+            --header-bg: rgba(248, 248, 248, 0.85);
         }
 
         @media (prefers-color-scheme: dark) {
@@ -30,71 +36,115 @@
                 --text-muted: #8e8e93;
                 --accent: #0a84ff;
                 --border: #38383a;
-                --tab-bg: #121212;
+                --tab-bg: rgba(18, 18, 18, 0.85);
+                --header-bg: rgba(18, 18, 18, 0.85);
             }
         }
 
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; padding-bottom: 80px; -webkit-tap-highlight-color: transparent; env(safe-area-inset-bottom); }
+        body { 
+            font-family: 'Lato', sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-color); 
+            margin: 0; 
+            padding: 0; 
+            padding-top: calc(60px + env(safe-area-inset-top)); 
+            padding-bottom: calc(80px + env(safe-area-inset-bottom)); 
+            -webkit-tap-highlight-color: transparent; 
+        }
         
+        /* --- HEADER SUPERIOR --- */
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            padding-top: env(safe-area-inset-top);
+            background: var(--header-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            z-index: 50;
+            letter-spacing: 0.5px;
+        }
+
         /* Contenedores */
-        .tab-content { display: none; padding: 20px; animation: fadeIn 0.2s ease-in-out; }
+        .tab-content { display: none; padding: 16px; animation: fadeIn 0.2s ease-in-out; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Elementos de formulario */
         .card { background: var(--card-bg); border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
         label:first-child { margin-top: 0; }
         
-        input[type="text"], input[type="number"], select { width: 100%; padding: 12px; background: var(--bg-color); border: 1px solid var(--border); color: var(--text-color); border-radius: 8px; box-sizing: border-box; font-size: 1rem; appearance: none; }
+        input[type="text"], input[type="number"], input[type="password"], input[type="url"], select { 
+            font-family: 'Lato', sans-serif; 
+            width: 100%; padding: 12px; background: var(--bg-color); border: 1px solid var(--border); color: var(--text-color); border-radius: 8px; box-sizing: border-box; font-size: 1rem; appearance: none; 
+        }
         input:focus, select:focus { outline: none; border-color: var(--accent); }
         
         .flex-row { display: flex; gap: 12px; align-items: center; }
         .flex-1 { flex: 1; }
         
         /* Checkbox y Color */
-        .checkbox-wrapper { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 0.9rem; }
+        .checkbox-wrapper { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 0.9rem; font-weight: 700;}
         input[type="color"] { width: 100%; height: 44px; padding: 0; border: none; border-radius: 8px; cursor: pointer; background: none; }
         
         /* Botones */
-        button { width: 100%; padding: 14px; margin-top: 16px; background: var(--accent); color: white; font-weight: 600; font-size: 1rem; border: none; border-radius: 10px; cursor: pointer; transition: opacity 0.2s; }
+        button { 
+            font-family: 'Lato', sans-serif; 
+            width: 100%; padding: 14px; margin-top: 16px; background: var(--accent); color: white; font-weight: 700; font-size: 1rem; border: none; border-radius: 10px; cursor: pointer; transition: opacity 0.2s; 
+        }
         button:active { opacity: 0.7; }
         .btn-secondary { background: var(--card-bg); color: var(--accent); border: 1px solid var(--accent); }
         .btn-danger { background: var(--danger); }
         .btn-small { padding: 8px 12px; font-size: 0.85rem; margin-top: 0; width: auto; }
         
         /* Estado */
-        #status { text-align: center; margin-top: 16px; font-size: 0.85rem; font-weight: 500; height: 20px; }
+        #status { text-align: center; margin-top: 16px; font-size: 0.85rem; font-weight: 700; height: 20px; }
+        #conn-check { text-align: center; font-size: 0.8rem; font-weight: 700; margin-bottom: 12px; color: var(--text-muted); }
         .success { color: #34c759; }
         .error { color: var(--danger); }
 
         /* Lista de Guardados */
         .saved-item { background: var(--card-bg); border-radius: 10px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
         .saved-info { flex: 1; overflow: hidden; }
-        .saved-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .saved-desc { font-size: 0.8rem; color: var(--text-muted); }
+        .saved-title { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .saved-desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
         .saved-actions { display: flex; gap: 8px; }
 
         /* Cuadrícula de Iconos */
         .icon-grid-container { height: 60vh; overflow-y: auto; background: var(--card-bg); border-radius: 12px; padding: 10px; border: 1px solid var(--border); }
         .icon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .icon-box { background: var(--bg-color); border: 1px solid var(--border); border-radius: 8px; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.75rem; cursor: pointer; color: var(--text-muted); }
+        .icon-box { background: var(--bg-color); border: 1px solid var(--border); border-radius: 8px; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; cursor: pointer; color: var(--text-muted); }
         .icon-box img { width: 60%; image-rendering: pixelated; margin-bottom: 4px; }
         .icon-box:active { background: var(--border); }
 
         /* Barra de Pestañas (Bottom Tab Bar) */
-        .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background: var(--tab-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-        .tab-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.7rem; width: 33%; height: 100%; cursor: pointer; transition: color 0.2s; }
+        .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background: var(--tab-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 50; }
+        .tab-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.7rem; font-weight: 700; width: 33%; height: 100%; cursor: pointer; transition: color 0.2s; }
         .tab-item svg { width: 24px; height: 24px; margin-bottom: 4px; fill: currentColor; }
         .tab-item.active { color: var(--accent); }
 
         /* Modal Configuración */
-        #configModal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg-color); z-index: 100; padding: 20px; padding-top: 50px; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom); }
+        #configModal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg-color); z-index: 100; padding: 20px; padding-top: calc(40px + env(safe-area-inset-top)); overflow-y: auto; padding-bottom: env(safe-area-inset-bottom); }
     </style>
 </head>
 <body>
 
+    <div class="app-header">
+        MSSGs Awtrix
+    </div>
+
     <div id="tab1" class="tab-content active">
+        <div id="conn-check">⏳ Comprobando conexión...</div>
+
         <div class="card">
             <label>Mensaje</label>
             <input type="text" id="msgText" placeholder="Escribe algo...">
@@ -148,7 +198,7 @@
         <p id="noSavedMsg" style="text-align:center; color:var(--text-muted); font-size:0.9rem;">No hay mensajes guardados.</p>
 
         <button class="btn-secondary" onclick="exportarBackup()" style="margin-top: 20px;">⬇️ Exportar Backup</button>
-        <button onclick="abrirConfig()" style="margin-top: 10px; background-color: #34c759;">⚙️ Configuración de Conexión</button>
+        <button onclick="abrirConfig()" style="margin-top: 10px; background-color: #34c759; color: white; border: none;">⚙️ Configuración de Conexión</button>
     </div>
 
     <div id="tab3" class="tab-content">
@@ -166,7 +216,7 @@
         
         <div class="card">
             <label>URL Home Assistant (con https://)</label>
-            <input type="text" id="confUrl" placeholder="https://tu-casa.ui.nabu.casa">
+            <input type="url" id="confUrl" placeholder="https://tu-casa.ui.nabu.casa">
             
             <label>Token de Larga Duración</label>
             <input type="password" id="confToken" placeholder="eyJhbGciOiJIUzI1NiIs...">
@@ -195,16 +245,50 @@
     </div>
 
     <script>
-        // Asegurarse de que el archivo icon.png existe en la raíz si se va a depurar en PC
-        
-        // --- 1. NAVEGACIÓN DE PESTAÑAS ---
+        // --- 1. NAVEGACIÓN Y COMPROBACIÓN ---
         function switchTab(tabIndex) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
             
             document.getElementById('tab' + tabIndex).classList.add('active');
             document.querySelectorAll('.tab-item')[tabIndex - 1].classList.add('active');
-            window.scrollTo(0,0); // Volver arriba al cambiar de pestaña
+            window.scrollTo(0,0);
+
+            if(tabIndex === 1) verificarConexion();
+        }
+
+        async function verificarConexion() {
+            const checkEl = document.getElementById('conn-check');
+            const url = localStorage.getItem('ha_url');
+            const token = localStorage.getItem('ha_token');
+
+            if (!url || !token) {
+                checkEl.innerHTML = "❌ Faltan datos de configuración";
+                checkEl.style.color = "var(--danger)";
+                return;
+            }
+
+            checkEl.innerHTML = "⏳ Comprobando...";
+            checkEl.style.color = "var(--text-muted)";
+
+            try {
+                // Comprobamos la API de Home Assistant
+                const response = await fetch(`${url}/api/`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    checkEl.innerHTML = "✅ Conectado a la red";
+                    checkEl.style.color = "#34c759";
+                } else {
+                    checkEl.innerHTML = "❌ Error en credenciales";
+                    checkEl.style.color = "var(--danger)";
+                }
+            } catch (error) {
+                checkEl.innerHTML = "❌ Sin conexión";
+                checkEl.style.color = "var(--danger)";
+            }
         }
 
         // --- 2. GESTIÓN DE CONFIGURACIÓN PRIVADA ---
@@ -226,6 +310,7 @@
             localStorage.setItem('ha_topic', document.getElementById('confTopic').value.trim());
             cerrarConfig();
             mostrarEstado("✅ Configuración guardada", "success");
+            verificarConexion();
         }
 
         // --- 3. ENVÍO AL RELOJ (API HOME ASSISTANT) ---
@@ -251,7 +336,6 @@
             mostrarEstado("Enviando...", "text-muted");
 
             try {
-                // Pequeño hack para iOS: forzar un ligero retraso para que la animación de "Enviando" se vea
                 await new Promise(r => setTimeout(r, 100));
 
                 const response = await fetch(`${url}/api/services/mqtt/publish`, {
@@ -349,7 +433,6 @@
         }
 
         function borrarMensaje(id) {
-            // Reemplazar confirm por un modal custom minimalista en el futuro si se desea
             if(confirm("¿Borrar este mensaje guardado?")) {
                 mensajesGuardados = mensajesGuardados.filter(m => m.id !== id);
                 localStorage.setItem('saved_msgs', JSON.stringify(mensajesGuardados));
@@ -404,7 +487,7 @@
             iconosFrecuentes.forEach(id => {
                 grid.innerHTML += `
                     <div class="icon-box" onclick="seleccionarIcono('${id}')">
-                        <img src="https://developer.lametric.com/content/apps/icon_thumbs/${id}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzg4OCI+PHBhdGggZD0iTTEyIDJDMi4yNyAyIDIgMi4yNyAyIDEydzAgMTBjMCA5LjczLjI3IDEwIDEwIDEwczEwLS4yNyAxMC0xMFYxMmMwLTkuNzMtLjI3LTEwLTEwLTEwem0wIDE4Yy04LjkyIDAtOC45Mi0uMjYtOC45Mi04UzMuMDggNCAxMiA0czguOTIuMjYgOC45Mi 8LS4yNiA4LTguOTIgOHoiLz48L3N2Zz4='">
+                        <img src="https://developer.lametric.com/content/apps/icon_thumbs/${id}" alt="Icon ${id}">
                         ID: ${id}
                     </div>
                 `;
@@ -413,13 +496,14 @@
 
         function seleccionarIcono(id) {
             document.getElementById('msgIcon').value = id;
-            switchTab(1); // Volver a la primera pestaña
+            switchTab(1);
         }
 
         // Inicialización al cargar la app
         window.onload = () => {
             renderSaved();
             renderIconGrid();
+            verificarConexion(); // Lanza la comprobación al arrancar
         };
     </script>
 </body>
