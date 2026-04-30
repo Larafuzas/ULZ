@@ -10,137 +10,80 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
-
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="icon" type="image/png" href="icon.png">
 
     <style>
-        /* --- ESTILOS MINIMALISTAS Y MODO DÍA/NOCHE --- */
         :root {
-            --bg-color: #f2f2f7;
-            --card-bg: #ffffff;
-            --text-color: #000000;
-            --text-muted: #8e8e93;
-            --accent: #007aff;
-            --border: #c6c6c8;
-            --danger: #ff3b30;
-            --tab-bg: rgba(248, 248, 248, 0.85);
-            --header-bg: rgba(248, 248, 248, 0.85);
+            --bg-color: #f2f2f7; --card-bg: #ffffff; --text-color: #000000;
+            --text-muted: #8e8e93; --accent: #007aff; --border: #c6c6c8;
+            --danger: #ff3b30; --tab-bg: rgba(248, 248, 248, 0.85); --header-bg: rgba(248, 248, 248, 0.85);
         }
-
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg-color: #000000;
-                --card-bg: #1c1c1e;
-                --text-color: #ffffff;
-                --text-muted: #8e8e93;
-                --accent: #0a84ff;
-                --border: #38383a;
-                --tab-bg: rgba(18, 18, 18, 0.85);
-                --header-bg: rgba(18, 18, 18, 0.85);
+                --bg-color: #000000; --card-bg: #1c1c1e; --text-color: #ffffff;
+                --text-muted: #8e8e93; --accent: #0a84ff; --border: #38383a;
+                --tab-bg: rgba(18, 18, 18, 0.85); --header-bg: rgba(18, 18, 18, 0.85);
             }
         }
 
-        body { 
-            font-family: 'Lato', sans-serif; 
-            background-color: var(--bg-color); 
-            color: var(--text-color); 
-            margin: 0; 
-            padding: 0; 
-            padding-top: calc(60px + env(safe-area-inset-top)); 
-            padding-bottom: calc(80px + env(safe-area-inset-bottom)); 
-            -webkit-tap-highlight-color: transparent; 
-        }
+        body { font-family: 'Lato', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; padding-top: calc(60px + env(safe-area-inset-top)); padding-bottom: calc(80px + env(safe-area-inset-bottom)); -webkit-tap-highlight-color: transparent; }
         
-        /* --- HEADER SUPERIOR --- */
-        .app-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 50px;
-            padding-top: env(safe-area-inset-top);
-            background: var(--header-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.1rem;
-            z-index: 50;
-            letter-spacing: 0.5px;
-        }
+        .app-header { position: fixed; top: 0; left: 0; right: 0; height: 50px; padding-top: env(safe-area-inset-top); background: var(--header-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; z-index: 50; letter-spacing: 0.5px; }
 
-        /* Contenedores */
         .tab-content { display: none; padding: 16px; animation: fadeIn 0.2s ease-in-out; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Elementos de formulario */
         .card { background: var(--card-bg); border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
         label:first-child { margin-top: 0; }
         
-        input[type="text"], input[type="number"], input[type="password"], input[type="url"], select { 
-            font-family: 'Lato', sans-serif; 
-            width: 100%; padding: 12px; background: var(--bg-color); border: 1px solid var(--border); color: var(--text-color); border-radius: 8px; box-sizing: border-box; font-size: 1rem; appearance: none; 
-        }
+        input[type="text"], input[type="number"], input[type="password"], input[type="url"], select { font-family: 'Lato', sans-serif; width: 100%; padding: 12px; background: var(--bg-color); border: 1px solid var(--border); color: var(--text-color); border-radius: 8px; box-sizing: border-box; font-size: 1rem; appearance: none; }
         input:focus, select:focus { outline: none; border-color: var(--accent); }
         
         .flex-row { display: flex; gap: 12px; align-items: center; }
         .flex-1 { flex: 1; }
         
-        /* Checkbox y Color */
         .checkbox-wrapper { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 0.9rem; font-weight: 700;}
         input[type="color"] { width: 100%; height: 44px; padding: 0; border: none; border-radius: 8px; cursor: pointer; background: none; }
         
-        /* Botones */
-        button { 
-            font-family: 'Lato', sans-serif; 
-            width: 100%; padding: 14px; margin-top: 16px; background: var(--accent); color: white; font-weight: 700; font-size: 1rem; border: none; border-radius: 10px; cursor: pointer; transition: opacity 0.2s; 
-        }
+        button { font-family: 'Lato', sans-serif; width: 100%; padding: 14px; margin-top: 16px; background: var(--accent); color: white; font-weight: 700; font-size: 1rem; border: none; border-radius: 10px; cursor: pointer; transition: opacity 0.2s; }
         button:active { opacity: 0.7; }
         .btn-secondary { background: var(--card-bg); color: var(--accent); border: 1px solid var(--accent); }
         .btn-danger { background: var(--danger); }
+        .btn-warning { background: #ff9500; color: white; }
         .btn-small { padding: 8px 12px; font-size: 0.85rem; margin-top: 0; width: auto; }
         
-        /* Estado */
         #status { text-align: center; margin-top: 16px; font-size: 0.85rem; font-weight: 700; height: 20px; }
         #conn-check { text-align: center; font-size: 0.8rem; font-weight: 700; margin-bottom: 12px; color: var(--text-muted); }
         .success { color: #34c759; }
         .error { color: var(--danger); }
 
-        /* Lista de Guardados */
         .saved-item { background: var(--card-bg); border-radius: 10px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
         .saved-info { flex: 1; overflow: hidden; }
         .saved-title { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .saved-desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
         .saved-actions { display: flex; gap: 8px; }
 
-        /* Cuadrícula de Iconos */
-        .icon-grid-container { height: 60vh; overflow-y: auto; background: var(--card-bg); border-radius: 12px; padding: 10px; border: 1px solid var(--border); }
+        .icon-grid-container { height: 50vh; overflow-y: auto; background: var(--card-bg); border-radius: 12px; padding: 10px; border: 1px solid var(--border); }
         .icon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .icon-box { background: var(--bg-color); border: 1px solid var(--border); border-radius: 8px; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; cursor: pointer; color: var(--text-muted); }
+        .icon-box { background: var(--bg-color); border: 1px solid var(--border); border-radius: 8px; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; cursor: pointer; color: var(--text-muted); position: relative; text-align: center;}
         .icon-box img { width: 60%; image-rendering: pixelated; margin-bottom: 4px; }
         .icon-box:active { background: var(--border); }
 
-        /* Barra de Pestañas (Bottom Tab Bar) */
         .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background: var(--tab-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 50; }
         .tab-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.7rem; font-weight: 700; width: 33%; height: 100%; cursor: pointer; transition: color 0.2s; }
         .tab-item svg { width: 24px; height: 24px; margin-bottom: 4px; fill: currentColor; }
         .tab-item.active { color: var(--accent); }
 
-        /* Modal Configuración */
         #configModal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg-color); z-index: 100; padding: 20px; padding-top: calc(40px + env(safe-area-inset-top)); overflow-y: auto; padding-bottom: env(safe-area-inset-bottom); }
+        .version-tag { font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="app-header">
-        MSSGs Awtrix
-    </div>
+    <div class="app-header">MSSGs Awtrix</div>
 
     <div id="tab1" class="tab-content active">
         <div id="conn-check">⏳ Comprobando conexión...</div>
@@ -151,8 +94,8 @@
             
             <div class="flex-row" style="margin-top: 12px;">
                 <div class="flex-1">
-                    <label>Icono (ID/Nombre)</label>
-                    <input type="text" id="msgIcon" placeholder="Ej: 62">
+                    <label>Icono (ID)</label>
+                    <input type="text" id="msgIcon" placeholder="Ej: 1943">
                 </div>
                 <div class="flex-1">
                     <label>Color</label>
@@ -163,15 +106,40 @@
                 </div>
             </div>
 
-            <label>Sonido</label>
+            <label>Sonido (Sintetizador)</label>
             <select id="msgSound">
                 <option value="">Ninguno</option>
-                <option value="beep">Beep</option>
-                <option value="tone">Tone</option>
-                <option value="alert">Alert</option>
-                <option value="ring">Ring</option>
-                <option value="notification">Notification</option>
-                <option value="alarm">Alarm</option>
+                <optgroup label="Notificaciones Cortas">
+                    <option value="DobleBeep:d=4,o=5,b=160:16e6,p,16e6">Doble Beep (Aviso)</option>
+                    <option value="Alegre:d=4,o=5,b=160:16g5,16c6,16e6">Tono Alegre</option>
+                    <option value="ChimeUp:d=4,o=5,b=140:16c,16e,16g,16c6">Campanilla Limpia</option>
+                    <option value="Exito:d=4,o=5,b=120:8c6,8e6,8g6,2c7">Jingle Éxito</option>
+                    <option value="Error:d=4,o=5,b=100:8d5,8d5,8d5">Error / Alerta Grave</option>
+                    <option value="Timbre:d=4,o=5,b=100:8e6,8c6">Timbre de Puerta</option>
+                    <option value="Alarma:d=4,o=5,b=100:8d6,8d6,8d6">Alarma Alerta</option>
+                    <option value="OldPhone:d=16,o=5,b=160:32c6,32e6,32c6,32e6,32c6,32e6,32c6,32e6,8p,32c6,32e6,32c6,32e6,32c6,32e6,32c6,32e6">Teléfono Retro</option>
+                </optgroup>
+                <optgroup label="Videojuegos">
+                    <option value="Coin:d=16,o=5,b=100:32b5,8e6">Mario - Moneda</option>
+                    <option value="1Up:d=16,o=5,b=150:e6,g6,e7,c7,d7,g7">Mario - 1 UP</option>
+                    <option value="ZeldaSecret:d=16,o=5,b=140:g5,fs5,ds5,a4,gs4,e5,gs5,c6">Zelda - Secreto</option>
+                    <option value="SonicRing:d=16,o=5,b=160:e6,g6,c7">Sonic - Anillo</option>
+                    <option value="Pacman:d=16,o=5,b=112:32b,32p,32b6,32p,32f#6,32p,32d#6,32p,32b6,32f#6,16p,16d#6,16p,32c6,32p,32c7,32p,32g6,32p,32e6,32p,32c7,32g6,16p,16e6">Pacman - Intro</option>
+                    <option value="PokeHeal:d=4,o=5,b=150:8b,8b,8e6,8g#6,e6">Pokémon - Curar</option>
+                    <option value="Tetris:d=4,o=5,b=160:e6,8b,8c6,8d6,16c6,16b,a,8a,8c6,e6,8d6,8c6,b,8b,8c6,d6,e6,c6,a">Tetris Theme</option>
+                </optgroup>
+                <optgroup label="Cine, TV y Música">
+                    <option value="Imperial:d=4,o=5,b=100:e,e,e,8c,16g,e,8c,16g,e">Star Wars - Marcha Imperial</option>
+                    <option value="MissionImp:d=16,o=6,b=95:32d,32d#,32d,32d#,32d,32d#,32d,32d#,32d,32d,32d#,32e,32f,32f#,32g,g,8p,g,8p,a#,p,c7,p,g,8p,g,8p,f,p,f#,p,g,8p,g,8p,a#,p,c7">Misión Imposible</option>
+                    <option value="XFiles:d=4,o=5,b=125:e,b,a,b,e6,2b.,e,b,a,b,d6,2b.">Expediente X</option>
+                    <option value="HarryPotter:d=4,o=5,b=100:8b,e6,8g6,8f#6,e6,8b6,a6,f#6,e6,8g6,8f#6,d6,f6,2b">Harry Potter</option>
+                    <option value="Indiana:d=4,o=5,b=250:e,8p,8f,8g,8p,1c6,8p.,d,8p,8e,1f,p.,g,8p,8a,8b,8p,1f6">Indiana Jones</option>
+                    <option value="Simpsons:d=4,o=5,b=160:c,e,f#,8a,g,e,c,8a4,8f#4,8f#4,8f#4,2g4">Los Simpsons</option>
+                    <option value="Looney:d=4,o=5,b=140:8c6,8p,8f6,8p,8e6,8d6,8c6,8b,8c6,8f6,8p,8d6,8p,8c6,8b,8a,8g,8a,8c6">Looney Tunes</option>
+                    <option value="7Nation:d=4,o=5,b=120:e,8e,8g,8e,8d,c,b4">Seven Nation Army</option>
+                    <option value="Rickroll:d=4,o=5,b=115:8g,8a,8c6,8a,e6,e6,2d6,8g,8a,8c6,8a,d6,d6,2c6">Rickroll</option>
+                    <option value="Beethoven:d=4,o=5,b=108:8g,8g,8g,2d#">Beethoven (5ª)</option>
+                </optgroup>
             </select>
 
             <div class="flex-row" style="margin-top: 12px;">
@@ -193,30 +161,47 @@
 
     <div id="tab2" class="tab-content">
         <h3 style="margin-top:0">Mensajes Guardados</h3>
-        <div id="savedList">
-            </div>
+        <div id="savedList"></div>
         <p id="noSavedMsg" style="text-align:center; color:var(--text-muted); font-size:0.9rem;">No hay mensajes guardados.</p>
 
-        <button class="btn-secondary" onclick="exportarBackup()" style="margin-top: 20px;">⬇️ Exportar Backup</button>
-        <button onclick="abrirConfig()" style="margin-top: 10px; background-color: #34c759; color: white; border: none;">⚙️ Configuración de Conexión</button>
+        <div class="flex-row" style="margin-top: 20px;">
+            <div class="flex-1">
+                <button class="btn-secondary" onclick="exportarBackup()">⬇️ Exportar Backup</button>
+            </div>
+            <div class="flex-1">
+                <button class="btn-secondary" onclick="document.getElementById('importFile').click()">⬆️ Importar</button>
+                <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importarBackup(event)">
+            </div>
+        </div>
+        
+        <button onclick="abrirConfig()" style="margin-top: 16px; background-color: #34c759; color: white; border: none;">⚙️ Configuración y OTA</button>
     </div>
 
     <div id="tab3" class="tab-content">
         <h3 style="margin-top:0">Mis Iconos Frecuentes</h3>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: -10px;">Se añaden automáticamente al guardar mensajes.</p>
+        
         <div class="icon-grid-container">
-            <div class="icon-grid" id="iconGrid">
-                </div>
+            <div class="icon-grid" id="iconGrid"></div>
         </div>
-        <button class="btn-secondary" onclick="window.open('https://developer.lametric.com/icons', '_blank')">🌐 Ver Más Iconos (LaMetric)</button>
+
+        <div class="flex-row" style="margin-top: 16px;">
+            <div class="flex-1">
+                <button class="btn-secondary" onclick="window.open('https://developer.lametric.com/icons', '_blank')" style="margin-top: 0; padding: 10px; font-size: 0.85rem;">🌐 Buscar Iconos</button>
+            </div>
+            <div class="flex-1">
+                <button class="btn-danger" onclick="restablecerIconos()" style="margin-top: 0; padding: 10px; font-size: 0.85rem;">🔄 Restablecer</button>
+            </div>
+        </div>
     </div>
 
     <div id="configModal">
-        <h2 style="margin-top:0">Datos Privados (Local)</h2>
-        <p style="font-size:0.85rem; color:var(--text-muted);">Estos datos no salen de tu teléfono.</p>
+        <h2 style="margin-top:0">Ajustes del Sistema</h2>
+        <p style="font-size:0.85rem; color:var(--text-muted);">Si la app está alojada en Home Assistant, puedes dejar la URL en blanco (Ruta Relativa Automática).</p>
         
         <div class="card">
-            <label>URL Home Assistant (con https://)</label>
-            <input type="url" id="confUrl" placeholder="https://tu-casa.ui.nabu.casa">
+            <label>URL Home Assistant (Opcional si es local)</label>
+            <input type="url" id="confUrl" placeholder="Dejar vacío para usar ruta relativa">
             
             <label>Token de Larga Duración</label>
             <input type="password" id="confToken" placeholder="eyJhbGciOiJIUzI1NiIs...">
@@ -226,26 +211,28 @@
         </div>
 
         <button onclick="guardarConfig()">Guardar y Cerrar</button>
+        <button class="btn-warning" onclick="forzarOTA()" style="margin-top:10px;">🔄 Forzar Actualización (OTA)</button>
         <button class="btn-danger" onclick="cerrarConfig()" style="margin-top:10px;">Cancelar</button>
+        
+        <div class="version-tag">Core Version: v2.0.0</div>
     </div>
 
     <div class="tab-bar">
         <div class="tab-item active" onclick="switchTab(1)">
-            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-            Enviar
+            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>Enviar
         </div>
         <div class="tab-item" onclick="switchTab(2)">
-            <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
-            Guardados
+            <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>Guardados
         </div>
         <div class="tab-item" onclick="switchTab(3)">
-            <svg viewBox="0 0 24 24"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
-            Iconos
+            <svg viewBox="0 0 24 24"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>Iconos
         </div>
     </div>
 
     <script>
-        // --- 1. NAVEGACIÓN Y COMPROBACIÓN ---
+        const APP_VERSION = "2.0.0";
+
+        // 1. GESTIÓN DE PESTAÑAS Y CONEXIÓN
         function switchTab(tabIndex) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
@@ -253,59 +240,59 @@
             document.getElementById('tab' + tabIndex).classList.add('active');
             document.querySelectorAll('.tab-item')[tabIndex - 1].classList.add('active');
             window.scrollTo(0,0);
-
             if(tabIndex === 1) verificarConexion();
         }
 
         async function verificarConexion() {
             const checkEl = document.getElementById('conn-check');
-            const url = localStorage.getItem('ha_url');
+            let urlRaw = localStorage.getItem('ha_url') || '';
             const token = localStorage.getItem('ha_token');
+            const topic = localStorage.getItem('ha_topic');
 
-            if (!url || !token) {
-                checkEl.innerHTML = "❌ Faltan datos de configuración";
-                checkEl.style.color = "var(--danger)";
-                return;
+            if (!token || !topic) { 
+                checkEl.innerHTML = "❌ Faltan datos de configuración"; 
+                checkEl.style.color = "var(--danger)"; 
+                return; 
             }
 
-            checkEl.innerHTML = "⏳ Comprobando...";
+            // Magia de Ruta Relativa: Si la URL está vacía, usamos el origen actual
+            let baseUrl = urlRaw.trim() !== '' ? urlRaw : "";
+            let fetchUrl = baseUrl !== "" ? `${baseUrl}/api/` : "/api/";
+
+            checkEl.innerHTML = "⏳ Comprobando..."; 
             checkEl.style.color = "var(--text-muted)";
 
             try {
-                // Comprobamos la API de Home Assistant
-                const response = await fetch(`${url}/api/`, {
+                const response = await fetch(fetchUrl, {
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
                 });
-
-                if (response.ok) {
-                    checkEl.innerHTML = "✅ Conectado a la red";
-                    checkEl.style.color = "#34c759";
-                } else {
-                    checkEl.innerHTML = "❌ Error en credenciales";
-                    checkEl.style.color = "var(--danger)";
+                
+                if (response.ok) { 
+                    checkEl.innerHTML = "✅ Conectado a Home Assistant"; 
+                    checkEl.style.color = "#34c759"; 
+                } else { 
+                    checkEl.innerHTML = `❌ Error de API (${response.status})`; 
+                    checkEl.style.color = "var(--danger)"; 
                 }
-            } catch (error) {
-                checkEl.innerHTML = "❌ Sin conexión";
-                checkEl.style.color = "var(--danger)";
+            } catch (error) { 
+                console.error("Error de Red / CORS:", error);
+                checkEl.innerHTML = "❌ Sin conexión (Posible bloqueo CORS)"; 
+                checkEl.style.color = "var(--danger)"; 
             }
         }
 
-        // --- 2. GESTIÓN DE CONFIGURACIÓN PRIVADA ---
+        // 2. CONFIGURACIÓN Y ACTUALIZACIONES OTA
         function abrirConfig() {
             document.getElementById('confUrl').value = localStorage.getItem('ha_url') || '';
             document.getElementById('confToken').value = localStorage.getItem('ha_token') || '';
             document.getElementById('confTopic').value = localStorage.getItem('ha_topic') || '';
             document.getElementById('configModal').style.display = 'block';
         }
-
-        function cerrarConfig() {
-            document.getElementById('configModal').style.display = 'none';
-        }
-
+        function cerrarConfig() { document.getElementById('configModal').style.display = 'none'; }
+        
         function guardarConfig() {
-            let url = document.getElementById('confUrl').value.replace(/\/$/, "").trim();
-            localStorage.setItem('ha_url', url);
+            localStorage.setItem('ha_url', document.getElementById('confUrl').value.replace(/\/$/, "").trim());
             localStorage.setItem('ha_token', document.getElementById('confToken').value.trim());
             localStorage.setItem('ha_topic', document.getElementById('confTopic').value.trim());
             cerrarConfig();
@@ -313,42 +300,58 @@
             verificarConexion();
         }
 
-        // --- 3. ENVÍO AL RELOJ (API HOME ASSISTANT) ---
+        function forzarOTA() {
+            // Inyectamos una marca de tiempo en la URL para destruir la caché del iPhone
+            const timestamp = new Date().getTime();
+            let currentPath = window.location.pathname;
+            window.location.replace(`${currentPath}?update=${timestamp}`);
+        }
+
+        // 3. ENVÍO AL RELOJ (PLAN B - DISPARO DOBLE)
         function mostrarEstado(msg, tipo) {
             const statusEl = document.getElementById('status');
             statusEl.innerHTML = `<span class="${tipo}">${msg}</span>`;
             setTimeout(() => { statusEl.innerHTML = "Listo"; }, 4000);
         }
 
-        async function enviarPayload(payload) {
-            const url = localStorage.getItem('ha_url');
+        async function enviarPayload(payload, rtttlString) {
+            let urlRaw = localStorage.getItem('ha_url') || '';
             const token = localStorage.getItem('ha_token');
             const topic = localStorage.getItem('ha_topic');
 
-            if (!url || !token || !topic) {
-                switchTab(2);
-                abrirConfig();
-                alert("Primero debes configurar los datos de conexión localmente.");
-                return;
-            }
+            if (!token || !topic) { switchTab(2); abrirConfig(); alert("Faltan datos de conexión."); return; }
 
-            const haBody = { topic: topic, payload: JSON.stringify(payload) };
+            let baseUrl = urlRaw.trim() !== '' ? urlRaw : "";
+            let apiPublishUrl = baseUrl !== "" ? `${baseUrl}/api/services/mqtt/publish` : "/api/services/mqtt/publish";
+
+            const haBodyVisual = { topic: topic, payload: JSON.stringify(payload) };
             mostrarEstado("Enviando...", "text-muted");
 
             try {
-                await new Promise(r => setTimeout(r, 100));
-
-                const response = await fetch(`${url}/api/services/mqtt/publish`, {
+                // 1er Disparo: Notificación Visual
+                const response = await fetch(apiPublishUrl, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify(haBody)
+                    body: JSON.stringify(haBodyVisual)
                 });
 
+                // 2º Disparo: Sonido directo al canal RTTTL
+                if (rtttlString) {
+                    const baseTopic = topic.replace(/\/notify$/i, ''); 
+                    const haBodyAudio = { topic: `${baseTopic}/rtttl`, payload: rtttlString };
+                    
+                    await fetch(apiPublishUrl, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify(haBodyAudio)
+                    });
+                }
+
                 if (response.ok) mostrarEstado("✅ ¡Mensaje enviado!", "success");
-                else mostrarEstado(`❌ Error ${response.status}: Revisa la configuración`, "error");
-            } catch (error) {
-                mostrarEstado("❌ Error de red (¿CORS en HA o URL incorrecta?)", "error");
-                console.error(error);
+                else mostrarEstado(`❌ Error ${response.status}`, "error");
+            } catch (error) { 
+                mostrarEstado("❌ Error de red", "error"); 
+                console.error(error); 
             }
         }
 
@@ -356,38 +359,43 @@
             const text = document.getElementById('msgText').value || " ";
             const icon = document.getElementById('msgIcon').value;
             const hex = document.getElementById('msgColor').value;
-            const rainbow = document.getElementById('msgRainbow').checked;
-            const sound = document.getElementById('msgSound').value;
-            const duration = parseInt(document.getElementById('msgDuration').value) || 10;
-            const repeat = parseInt(document.getElementById('msgRepeat').value) || 1;
+            const sound = document.getElementById('msgSound').value; 
 
             const payload = {
                 text: text,
                 wakeup: true,
-                duration: duration,
-                repeat: repeat,
+                duration: parseInt(document.getElementById('msgDuration').value) || 10,
+                repeat: parseInt(document.getElementById('msgRepeat').value) || 1,
                 color: [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)]
             };
 
-            if (rainbow) payload.rainbow = true;
+            if (document.getElementById('msgRainbow').checked) payload.rainbow = true;
             if (icon) payload.icon = icon;
-            if (sound) payload.sound = sound;
 
-            enviarPayload(payload);
+            enviarPayload(payload, sound ? sound : null);
         }
 
-        // --- 4. GESTIÓN DE MENSAJES GUARDADOS ---
+        // 4. DATOS LOCALES (Mensajes e Iconos)
         let mensajesGuardados = JSON.parse(localStorage.getItem('saved_msgs')) || [];
+        
+        const iconosPredeterminados = ['1943', '2819', '35778', '9136', '44874', '37384', '2012', '44873', '1063'];
+        let iconosGuardados = JSON.parse(localStorage.getItem('saved_icons')) || iconosPredeterminados;
 
         function guardarMensaje() {
-            if(!document.getElementById('msgText').value && !document.getElementById('msgIcon').value) {
-                alert("Añade al menos un texto o icono para guardar."); return;
-            }
+            const textVal = document.getElementById('msgText').value;
+            const iconVal = document.getElementById('msgIcon').value.trim();
+            if(!textVal && !iconVal) { alert("Añade un texto o icono."); return; }
             
+            if(iconVal && !iconosGuardados.includes(iconVal)) {
+                iconosGuardados.push(iconVal);
+                localStorage.setItem('saved_icons', JSON.stringify(iconosGuardados));
+                renderIconGrid();
+            }
+
             const msgObj = {
                 id: Date.now(),
-                text: document.getElementById('msgText').value,
-                icon: document.getElementById('msgIcon').value,
+                text: textVal,
+                icon: iconVal,
                 color: document.getElementById('msgColor').value,
                 rainbow: document.getElementById('msgRainbow').checked,
                 sound: document.getElementById('msgSound').value,
@@ -419,17 +427,14 @@
             const msg = mensajesGuardados.find(m => m.id === id);
             if(!msg) return;
             const payload = {
-                text: msg.text || " ",
-                wakeup: true,
-                duration: parseInt(msg.duration) || 10,
-                repeat: parseInt(msg.repeat) || 1,
+                text: msg.text || " ", wakeup: true,
+                duration: parseInt(msg.duration) || 10, repeat: parseInt(msg.repeat) || 1,
                 color: [parseInt(msg.color.slice(1,3),16), parseInt(msg.color.slice(3,5),16), parseInt(msg.color.slice(5,7),16)]
             };
             if (msg.rainbow) payload.rainbow = true;
             if (msg.icon) payload.icon = msg.icon;
-            if (msg.sound) payload.sound = msg.sound;
             
-            enviarPayload(payload);
+            enviarPayload(payload, msg.sound ? msg.sound : null);
         }
 
         function borrarMensaje(id) {
@@ -445,12 +450,14 @@
             const noMsg = document.getElementById('noSavedMsg');
             container.innerHTML = '';
             
-            if(mensajesGuardados.length === 0) {
-                noMsg.style.display = 'block';
-            } else {
+            if(mensajesGuardados.length === 0) { noMsg.style.display = 'block'; } 
+            else {
                 noMsg.style.display = 'none';
                 mensajesGuardados.forEach(msg => {
-                    const desc = `${msg.icon ? 'Ícono: '+msg.icon : 'Sin icono'} | ${msg.sound || 'Sin sonido'} | ${msg.duration}s`;
+                    let descSonido = "Sin sonido";
+                    if(msg.sound) descSonido = document.querySelector(`#msgSound option[value="${msg.sound}"]`)?.text || "Melodía";
+                    const desc = `${msg.icon ? 'Ícono: '+msg.icon : 'Sin icono'} | ${descSonido} | ${msg.duration}s`;
+                    
                     container.innerHTML += `
                         <div class="saved-item">
                             <div class="saved-info" onclick="cargarAlFormulario(${msg.id})">
@@ -467,24 +474,10 @@
             }
         }
 
-        // --- 5. BACKUP ---
-        function exportarBackup() {
-            if(mensajesGuardados.length === 0) { alert("No hay nada que exportar."); return; }
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(mensajesGuardados));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "awtrix_backup.json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-        }
-
-        // --- 6. GALERÍA DE ICONOS ---
-        const iconosFrecuentes = [54, 87, 314, 1269, 4833, 5029, 2351, 10565, 4390, 16187, 5216, 205];
-        
         function renderIconGrid() {
             const grid = document.getElementById('iconGrid');
-            iconosFrecuentes.forEach(id => {
+            grid.innerHTML = '';
+            iconosGuardados.forEach(id => {
                 grid.innerHTML += `
                     <div class="icon-box" onclick="seleccionarIcono('${id}')">
                         <img src="https://developer.lametric.com/content/apps/icon_thumbs/${id}" alt="Icon ${id}">
@@ -494,16 +487,71 @@
             });
         }
 
-        function seleccionarIcono(id) {
-            document.getElementById('msgIcon').value = id;
-            switchTab(1);
+        function seleccionarIcono(id) { document.getElementById('msgIcon').value = id; switchTab(1); }
+
+        function restablecerIconos() {
+            if(confirm("¿Estás seguro de restablecer la galería a los iconos por defecto?")) {
+                iconosGuardados = [...iconosPredeterminados];
+                localStorage.setItem('saved_icons', JSON.stringify(iconosGuardados));
+                renderIconGrid();
+            }
         }
 
-        // Inicialización al cargar la app
+        // 5. BACKUP TOTAL
+        function exportarBackup() {
+            const backupTotal = {
+                mensajes: mensajesGuardados,
+                iconos: iconosGuardados,
+                config: {
+                    url: localStorage.getItem('ha_url') || '',
+                    token: localStorage.getItem('ha_token') || '',
+                    topic: localStorage.getItem('ha_topic') || ''
+                }
+            };
+            
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupTotal));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "mssgs_awtrix_backup_v2.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function importarBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.mensajes) { mensajesGuardados = data.mensajes; localStorage.setItem('saved_msgs', JSON.stringify(mensajesGuardados)); }
+                    if (data.iconos) { iconosGuardados = data.iconos; localStorage.setItem('saved_icons', JSON.stringify(iconosGuardados)); }
+                    if (data.config) {
+                        localStorage.setItem('ha_url', data.config.url || '');
+                        localStorage.setItem('ha_token', data.config.token || '');
+                        localStorage.setItem('ha_topic', data.config.topic || '');
+                    }
+                    
+                    renderSaved();
+                    renderIconGrid();
+                    verificarConexion();
+                    alert("✅ ¡Backup importado con éxito!");
+                } catch (error) {
+                    alert("❌ Error: El archivo no es un backup válido.");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // Inicialización
         window.onload = () => {
             renderSaved();
             renderIconGrid();
-            verificarConexion(); // Lanza la comprobación al arrancar
+            verificarConexion();
         };
     </script>
 </body>
