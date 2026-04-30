@@ -196,12 +196,12 @@
     </div>
 
     <div id="configModal">
-        <h2 style="margin-top:0">Ajustes del Sistema</h2>
-        <p style="font-size:0.85rem; color:var(--text-muted);">Si la app está alojada en Home Assistant, puedes dejar la URL en blanco (Ruta Relativa Automática).</p>
+        <h2 style="margin-top:0">Datos Privados (Local)</h2>
+        <p style="font-size:0.85rem; color:var(--text-muted);">Tus datos se guardan solo en tu móvil de forma segura.</p>
         
         <div class="card">
-            <label>URL Home Assistant (Opcional si es local)</label>
-            <input type="url" id="confUrl" placeholder="Dejar vacío para usar ruta relativa">
+            <label>URL Home Assistant (con https://)</label>
+            <input type="url" id="confUrl" placeholder="https://tu-casa.ui.nabu.casa">
             
             <label>Token de Larga Duración</label>
             <input type="password" id="confToken" placeholder="eyJhbGciOiJIUzI1NiIs...">
@@ -214,7 +214,7 @@
         <button class="btn-warning" onclick="forzarOTA()" style="margin-top:10px;">🔄 Forzar Actualización (OTA)</button>
         <button class="btn-danger" onclick="cerrarConfig()" style="margin-top:10px;">Cancelar</button>
         
-        <div class="version-tag">Core Version: v2.0.0</div>
+        <div class="version-tag">Core Version: v2.1.0</div>
     </div>
 
     <div class="tab-bar">
@@ -230,13 +230,11 @@
     </div>
 
     <script>
-        const APP_VERSION = "2.0.0";
+        const APP_VERSION = "2.1.0";
 
-        // 1. GESTIÓN DE PESTAÑAS Y CONEXIÓN
         function switchTab(tabIndex) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
-            
             document.getElementById('tab' + tabIndex).classList.add('active');
             document.querySelectorAll('.tab-item')[tabIndex - 1].classList.add('active');
             window.scrollTo(0,0);
@@ -249,15 +247,13 @@
             const token = localStorage.getItem('ha_token');
             const topic = localStorage.getItem('ha_topic');
 
-            if (!token || !topic) { 
+            if (!urlRaw || !token || !topic) { 
                 checkEl.innerHTML = "❌ Faltan datos de configuración"; 
                 checkEl.style.color = "var(--danger)"; 
                 return; 
             }
 
-            // Magia de Ruta Relativa: Si la URL está vacía, usamos el origen actual
-            let baseUrl = urlRaw.trim() !== '' ? urlRaw : "";
-            let fetchUrl = baseUrl !== "" ? `${baseUrl}/api/` : "/api/";
+            let fetchUrl = `${urlRaw}/api/`;
 
             checkEl.innerHTML = "⏳ Comprobando..."; 
             checkEl.style.color = "var(--text-muted)";
@@ -277,12 +273,11 @@
                 }
             } catch (error) { 
                 console.error("Error de Red / CORS:", error);
-                checkEl.innerHTML = "❌ Sin conexión (Posible bloqueo CORS)"; 
+                checkEl.innerHTML = "❌ Sin conexión (Revisa el permiso CORS en HA)"; 
                 checkEl.style.color = "var(--danger)"; 
             }
         }
 
-        // 2. CONFIGURACIÓN Y ACTUALIZACIONES OTA
         function abrirConfig() {
             document.getElementById('confUrl').value = localStorage.getItem('ha_url') || '';
             document.getElementById('confToken').value = localStorage.getItem('ha_token') || '';
@@ -301,13 +296,12 @@
         }
 
         function forzarOTA() {
-            // Inyectamos una marca de tiempo en la URL para destruir la caché del iPhone
             const timestamp = new Date().getTime();
-            let currentPath = window.location.pathname;
-            window.location.replace(`${currentPath}?update=${timestamp}`);
+            let currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('update', timestamp);
+            window.location.replace(currentUrl.toString());
         }
 
-        // 3. ENVÍO AL RELOJ (PLAN B - DISPARO DOBLE)
         function mostrarEstado(msg, tipo) {
             const statusEl = document.getElementById('status');
             statusEl.innerHTML = `<span class="${tipo}">${msg}</span>`;
@@ -319,23 +313,20 @@
             const token = localStorage.getItem('ha_token');
             const topic = localStorage.getItem('ha_topic');
 
-            if (!token || !topic) { switchTab(2); abrirConfig(); alert("Faltan datos de conexión."); return; }
+            if (!urlRaw || !token || !topic) { switchTab(2); abrirConfig(); alert("Faltan datos de conexión."); return; }
 
-            let baseUrl = urlRaw.trim() !== '' ? urlRaw : "";
-            let apiPublishUrl = baseUrl !== "" ? `${baseUrl}/api/services/mqtt/publish` : "/api/services/mqtt/publish";
+            let apiPublishUrl = `${urlRaw}/api/services/mqtt/publish`;
 
             const haBodyVisual = { topic: topic, payload: JSON.stringify(payload) };
             mostrarEstado("Enviando...", "text-muted");
 
             try {
-                // 1er Disparo: Notificación Visual
                 const response = await fetch(apiPublishUrl, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(haBodyVisual)
                 });
 
-                // 2º Disparo: Sonido directo al canal RTTTL
                 if (rtttlString) {
                     const baseTopic = topic.replace(/\/notify$/i, ''); 
                     const haBodyAudio = { topic: `${baseTopic}/rtttl`, payload: rtttlString };
@@ -350,7 +341,7 @@
                 if (response.ok) mostrarEstado("✅ ¡Mensaje enviado!", "success");
                 else mostrarEstado(`❌ Error ${response.status}`, "error");
             } catch (error) { 
-                mostrarEstado("❌ Error de red", "error"); 
+                mostrarEstado("❌ Error de red (Posible CORS)", "error"); 
                 console.error(error); 
             }
         }
@@ -375,9 +366,7 @@
             enviarPayload(payload, sound ? sound : null);
         }
 
-        // 4. DATOS LOCALES (Mensajes e Iconos)
         let mensajesGuardados = JSON.parse(localStorage.getItem('saved_msgs')) || [];
-        
         const iconosPredeterminados = ['1943', '2819', '35778', '9136', '44874', '37384', '2012', '44873', '1063'];
         let iconosGuardados = JSON.parse(localStorage.getItem('saved_icons')) || iconosPredeterminados;
 
@@ -406,7 +395,7 @@
             mensajesGuardados.push(msgObj);
             localStorage.setItem('saved_msgs', JSON.stringify(mensajesGuardados));
             renderSaved();
-            mostrarEstado("💾 Guardado en pestaña 2", "success");
+            mostrarEstado("💾 Guardado", "success");
         }
 
         function cargarAlFormulario(id) {
@@ -497,7 +486,6 @@
             }
         }
 
-        // 5. BACKUP TOTAL
         function exportarBackup() {
             const backupTotal = {
                 mensajes: mensajesGuardados,
@@ -547,7 +535,6 @@
             event.target.value = '';
         }
 
-        // Inicialización
         window.onload = () => {
             renderSaved();
             renderIconGrid();
